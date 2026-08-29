@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LabelGuard AI</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <div class="badge">HACKATHON MVP</div>
+
+        <h1>
+            LabelGuard <span>AI</span>
+        </h1>
+
+        <p>
+            Scan or enter a food label to detect common
+            allergens and warning ingredients.
+        </p>
+    </header>
+
+
+    <section class="card">
+
+        <label class="title">
+            Ingredient / Label Text
+        </label>
+
+        <textarea
+            id="labelText"
+            placeholder="Example: wheat flour, sugar, milk solids, soy lecithin, salt..."
+        ></textarea>
+
+
+        <div class="examples">
+
+            <button onclick="loadExample(1)">
+                Example 1
+            </button>
+
+            <button onclick="loadExample(2)">
+                Example 2
+            </button>
+
+        </div>
+
+
+        <div class="scan-section">
+
+            <div class="scan-title">
+                📷 Scan Food Label
+            </div>
+
+            <input
+                type="file"
+                id="imageInput"
+                accept="image/*"
+                capture="environment"
+            >
+
+            <img
+                id="preview"
+                class="preview"
+                alt="Food label preview"
+            >
+
+            <button
+                class="scan-btn"
+                onclick="scanImage()"
+            >
+                📷 Scan & Analyze Photo
+            </button>
+
+            <div
+                id="ocrStatus"
+                class="status-text"
+            ></div>
+
+        </div>
+
+
+        <button
+            class="analyze-btn"
+            onclick="analyzeLabel()"
+        >
+            Analyze Label Text
+        </button>
+
+        <div
+            id="error"
+            class="error"
+        ></div>
+
+    </section>
+
+
+    <section
+        id="result"
+        class="result hidden"
+    >
+
+        <div class="score-card">
+
+            <div class="score-circle">
+                <span id="score">--</span>
+            </div>
+
+            <div>
+                <h2 id="status">
+                    Result
+                </h2>
+
+                <p>
+                    Label screening score
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="result-box extracted-box">
+
+            <h3>
+                📝 Detected Text
+            </h3>
+
+            <p id="extractedText">
+                --
+            </p>
+
+        </div>
+
+
+        <div class="result-box">
+
+            <h3>
+                ⚠ Allergens
+            </h3>
+
+            <ul id="allergens"></ul>
+
+        </div>
+
+
+        <div class="result-box">
+
+            <h3>
+                🔎 Warnings
+            </h3>
+
+            <ul id="warnings"></ul>
+
+        </div>
+
+
+        <div class="result-box">
+
+            <h3>
+                🧾 Ingredients
+            </h3>
+
+            <p>
+                <strong id="ingredientCount">
+                    0
+                </strong>
+                detected items
+            </p>
+
+        </div>
+
+
+        <div class="note">
+
+            ⚠ This is a hackathon prototype and not medical advice.
+            Always verify the original product packaging.
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
