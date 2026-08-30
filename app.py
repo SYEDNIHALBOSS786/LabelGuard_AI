@@ -17,7 +17,7 @@ def handle_all_exceptions(e):
     traceback.print_exc()
     return jsonify({
         "success": False,
-        "message": f"Server Notice: {str(e)}"
+        "message": f"Engine Notice: {str(e)}"
     }), 200
 
 def clean_json_response(raw_resp):
@@ -51,7 +51,7 @@ def health():
 def process_ocr():
     try:
         if not API_KEY:
-            return jsonify({"success": False, "message": "GEMINI_API_KEY is not configured on Render."}), 200
+            return jsonify({"success": False, "message": "GEMINI_API_KEY environment variable is not configured."}), 200
 
         client = genai.Client(api_key=API_KEY)
 
@@ -65,9 +65,9 @@ def process_ocr():
         4. NUTRITION: Classify Sugar and Sodium levels (HIGH / MODERATE / LOW).
         5. LEGAL METROLOGY (6 Rules): Extract exact MRP, Net Quantity, Manufacturer details, Mfg/Expiry dates, Customer Care, and Country of Origin.
 
-        Return ONLY a JSON object matching this schema:
+        Return ONLY a raw JSON object:
         {
-            "raw_text": "Complete OCR transcribed label text...",
+            "raw_text": "Complete transcribed text from the label...",
             "compliance_score": 100,
             "overall_status": "COMPLIANT",
             "summary": "Clear summary of compliance, allergens, and additives",
@@ -82,10 +82,10 @@ def process_ocr():
             "health_safety": {
                 "allergens": ["List all detected allergens"],
                 "preservatives": ["List all INS numbers & additives"],
-                "harmful_substances": ["Palm Oil", "Invert Syrup"],
+                "harmful_substances": ["List any flagged additives/palm oil or None Flagged"],
                 "sugar_level": "MODERATE",
                 "sodium_level": "LOW",
-                "health_warning": "Contains multiple allergens (Wheat, Oats, Sesame, Soy, Nuts, Peanut)."
+                "health_warning": "Clear summary of health, allergen, and chemical risks."
             }
         }
         """
@@ -113,7 +113,7 @@ def process_ocr():
                 prompt_instruction
             ]
 
-        # Use gemini-3.6-flash cleanly
+        # Use active model gemini-3.6-flash
         config = types.GenerateContentConfig(
             response_mime_type="application/json"
         )
