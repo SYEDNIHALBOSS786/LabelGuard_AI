@@ -1,198 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-site-verification" content="bH_wkxly4JKdivszMcz3ctgv9bT8yD5PrnIXTsjXsDc" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>LabelGuard AI</title>
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
+<meta name="google-site-verification" content="bH_wkxly4JKdivszMcz3ctgv9bT8yD5PrnIXTsjXsDc">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LabelGuard AI | Compliance Assistant</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div class="container">
 
-    <header>
-        <div class="badge">HACKATHON MVP</div>
+<header>
+<div class="badge">SIH26034 • COMPLIANCE ASSISTANT</div>
+<h1>LabelGuard <span>AI</span></h1>
+<p>AI-assisted screening of packaged commodity labels for required declarations.</p>
+</header>
 
-        <h1>
-            LabelGuard <span>AI</span>
-        </h1>
+<section class="card">
 
-        <p>
-            Scan or enter a food label to detect common
-            allergens and warning ingredients.
-        </p>
-    </header>
+<div class="section-heading">
+<h2>Inspect a Product</h2>
+<p>Upload a clear label image or enter label text manually.</p>
+</div>
 
+<div class="scan-section">
+<div class="scan-title">📷 Scan Product Label</div>
 
-    <section class="card">
+<div class="upload-options">
 
-        <label class="title">
-            Ingredient / Label Text
-        </label>
+    <button type="button" class="upload-btn camera-btn"
+            onclick="openCamera()">
+        📷 Camera
+    </button>
 
-        <textarea
-            id="labelText"
-            placeholder="Example: wheat flour, sugar, milk solids, soy lecithin, salt..."
-        ></textarea>
-
-
-        <div class="examples">
-
-            <button onclick="loadExample(1)">
-                Example 1
-            </button>
-
-            <button onclick="loadExample(2)">
-                Example 2
-            </button>
-
-        </div>
-
-
-        <div class="scan-section">
-
-            <div class="scan-title">
-                📷 Scan Food Label
-            </div>
-
-            <input
-                type="file"
-                id="imageInput"
-                accept="image/*"
-                capture="environment"
-            >
-
-            <img
-                id="preview"
-                class="preview"
-                alt="Food label preview"
-            >
-
-            <button
-                class="scan-btn"
-                onclick="scanImage()"
-            >
-                📷 Scan & Analyze Photo
-            </button>
-
-            <div
-                id="ocrStatus"
-                class="status-text"
-            ></div>
-
-        </div>
-
-
-        <button
-            class="analyze-btn"
-            onclick="analyzeLabel()"
-        >
-            Analyze Label Text
-        </button>
-
-        <div
-            id="error"
-            class="error"
-        ></div>
-
-    </section>
-
-
-    <section
-        id="result"
-        class="result hidden"
-    >
-
-        <div class="score-card">
-
-            <div class="score-circle">
-                <span id="score">--</span>
-            </div>
-
-            <div>
-                <h2 id="status">
-                    Result
-                </h2>
-
-                <p>
-                    Label screening score
-                </p>
-            </div>
-
-        </div>
-
-
-        <div class="result-box extracted-box">
-
-            <h3>
-                📝 Detected Text
-            </h3>
-
-            <p id="extractedText">
-                --
-            </p>
-
-        </div>
-
-
-        <div class="result-box">
-
-            <h3>
-                ⚠ Allergens
-            </h3>
-
-            <ul id="allergens"></ul>
-
-        </div>
-
-
-        <div class="result-box">
-
-            <h3>
-                🔎 Warnings
-            </h3>
-
-            <ul id="warnings"></ul>
-
-        </div>
-
-
-        <div class="result-box">
-
-            <h3>
-                🧾 Ingredients
-            </h3>
-
-            <p>
-                <strong id="ingredientCount">
-                    0
-                </strong>
-                detected items
-            </p>
-
-        </div>
-
-
-        <div class="note">
-
-            ⚠ This is a hackathon prototype and not medical advice.
-            Always verify the original product packaging.
-
-        </div>
-
-    </section>
+    <button type="button" class="upload-btn gallery-btn"
+            onclick="openGallery()">
+        🖼️ Gallery / File
+    </button>
 
 </div>
 
+<input type="file" id="cameraInput"
+       accept="image/*"
+       capture="environment"
+       hidden>
+
+<input type="file" id="galleryInput"
+       accept="image/*"
+       hidden>
+
+<input type="file" id="imageInput"
+       accept="image/*"
+       hidden>
+
+<img id="preview" class="preview" alt="Product label preview">
+
+<button class="scan-btn" onclick="scanImage()">
+📷 Scan & Check Label
+</button>
+
+<div id="ocrStatus" class="status-text"></div>
+</div>
+
+<div class="divider"><span>OR ENTER TEXT</span></div>
+
+<label class="title" for="labelText">Detected / Label Text</label>
+
+<textarea id="labelText" placeholder="Example:
+
+MRP ₹99.00 (Incl. of all taxes)
+Net Quantity 500 g
+Manufactured by ABC Foods Pvt Ltd
+Packed by ABC Foods Pvt Ltd
+Date of Mfg: 08/2026
+Consumer Care: 1800-123-4567"></textarea>
+
+<div class="examples">
+<button onclick="loadExample(1)">Valid Example</button>
+<button onclick="loadExample(2)">Review Example</button>
+</div>
+
+<button class="analyze-btn" onclick="analyzeLabel()">
+🔍 Check Compliance
+</button>
+
+<div id="error" class="error"></div>
+
+</section>
+
+<section id="result" class="result hidden">
+
+<div class="result-header">
+<div>
+<span class="small-label">SCREENING RESULT</span>
+<h2 id="status">Result</h2>
+<p id="resultSummary">Compliance screening completed.</p>
+</div>
+
+<div class="score-circle">
+<span id="score">--</span>
+<small>/100</small>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat">
+<strong id="detectedCount">0</strong>
+<span>Detected</span>
+</div>
+
+<div class="stat">
+<strong id="totalChecks">0</strong>
+<span>Total Checks</span>
+</div>
+
+<div class="stat">
+<strong id="missingCount">0</strong>
+<span>Not Detected</span>
+</div>
+</div>
+
+<div class="result-box">
+<h3>📋 Declaration Checks</h3>
+<div id="checks"></div>
+</div>
+
+<div class="result-box">
+<h3>⚠️ Items Requiring Attention</h3>
+<ul id="missing"></ul>
+</div>
+
+<div class="result-box extracted-box">
+<h3>📝 OCR / Input Evidence</h3>
+<pre id="extractedText">--</pre>
+</div>
+
+<div class="report-box">
+<div>
+<strong>Inspection screening</strong>
+<p id="analysisTime">--</p>
+</div>
+<button onclick="window.print()">🖨️ Print Report</button>
+</div>
+
+<div class="note">
+⚠️ <strong>Important:</strong> This tool provides AI-assisted screening only.
+A detected declaration does not by itself prove legal compliance.
+Final verification should be performed against applicable requirements
+and the original package.
+</div>
+
+</section>
+
+</div>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
 </html>

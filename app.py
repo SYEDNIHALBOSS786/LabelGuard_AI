@@ -4,49 +4,61 @@ import re
 import shutil
 import subprocess
 import tempfile
+from datetime import datetime
 
 app = Flask(__name__)
 
-ALLERGENS = {
-    "Milk": [
-        "milk", "milk solids", "whey", "casein",
-        "lactose", "butter", "cream", "cheese"
-    ],
-    "Peanut": [
-        "peanut", "groundnut", "peanut butter"
-    ],
-    "Soy": [
-        "soy", "soya", "soybean", "soy lecithin"
-    ],
-    "Gluten": [
-        "wheat", "wheat flour", "barley",
-        "rye", "gluten", "maida"
-    ],
-    "Egg": [
-        "egg", "eggs", "albumin", "ovalbumin"
-    ],
-    "Nuts": [
-        "almond", "cashew", "walnut",
-        "pistachio", "hazelnut"
-    ]
-}
+# SIH26034 — Packaged Commodity Compliance Assistant
+#
+# This is a screening tool, not a legal determination.
+# It checks whether expected declaration text can be detected
+# from the supplied label text/image.
 
-WARNINGS = {
-    "Sugar": [
-        "sugar", "glucose syrup", "fructose",
-        "maltose", "sucrose"
+CHECKS = {
+    "MRP": [
+        r"\bm\.?\s*r\.?\s*p\.?\b",
+        r"maximum retail price",
+        r"retail price"
     ],
-    "High Sodium": [
-        "sodium", "salt"
+    "Net Quantity": [
+        r"net\s*(qty|quantity|wt|weight|volume)",
+        r"net\s*w?t\.?",
+        r"\b\d+(?:\.\d+)?\s*(g|kg|mg|ml|l|litre|liter)\b"
     ],
-    "Preservatives": [
-        "preservative", "sodium benzoate",
-        "potassium sorbate", "benzoate"
+    "Manufacturer / Packer": [
+        r"manufactured by",
+        r"manufactured\s*&?\s*packed by",
+        r"manufactured\s*and\s*packed by",
+        r"packed by",
+        r"manufacturer",
+        r"packer"
     ],
-    "Artificial Colours": [
-        "artificial colour", "artificial color",
-        "tartrazine", "sunset yellow",
-        "brilliant blue", "caramel colour"
+    "Importer": [
+        r"imported by",
+        r"importer",
+        r"imported\s*&?\s*marketed by",
+        r"imported\s*and\s*marketed by"
+    ],
+    "Date": [
+        r"date of manufacture",
+        r"date of mfg",
+        r"mfg\.?\s*date",
+        r"manufacturing date",
+        r"packed on",
+        r"packing date",
+        r"date of packing",
+        r"date of import",
+        r"import date"
+    ],
+    "Consumer Care": [
+        r"consumer care",
+        r"consumer\s*complaint",
+        r"customer care",
+        r"customer\s*care",
+        r"toll[-\s]?free",
+        r"helpline",
+        r"care@",
+        r"contact us"
     ]
 }
 
@@ -57,60 +69,78 @@ def clean_text(text):
     return text.strip()
 
 
-def analyze_label(text):
+def find_matches(text, patterns):
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(0)
+    return None
+
+
+def analyze_compliance(text):
     original_text = text.strip()
-    text = clean_text(text)
 
-    allergens = []
-    warnings = []
+    if not original_text:
+        return {
+            "error": "No readable label text was found."
+        }
 
-    for name, terms in ALLERGENS.items():
-        for term in terms:
-            if term in text:
-                allergens.append(name)
-                break
+    cleaned = clean_text(original_text)
 
-    for name, terms in WARNINGS.items():
-        for term in terms:
-            if term in text:
-                warnings.append(name)
-                break
+    checks = []
+    found_count = 0
 
-    ingredients = [
-        item.strip()
-        for item in re.split(r",|;|\n", original_text)
-        if item.strip()
+    for name, patterns in CHECKS.items():
+        match = find_matches(cleaned, patterns)
+
+        if match:
+            found_count += 1
+            checks.append({
+                "name": name,
+                "status": "FOUND",
+                "evidence": match
+            })
+        else:
+            checks.append({
+                "name": name,
+                "status": "NOT DETECTED",
+                "evidence": ""
+            })
+
+    total = len(checks)
+    score = round((found_count / total) * 100)
+
+    missing = [
+        item["name"]
+        for item in checks
+        if item["status"] == "NOT DETECTED"
     ]
 
-    # Simple hackathon screening score
-    score = 100
-    score -= len(allergens) * 15
-    score -= len(warnings) * 7
-    score = max(0, min(100, score))
-
-    if score >= 80:
-        status = "Looks relatively clean"
-    elif score >= 55:
-        status = "Review before consuming"
+    if score >= 85:
+        status = "LIKELY COMPLIANT — VERIFY"
+    elif score >= 60:
+        status = "PARTIAL — MANUAL REVIEW REQUIRED"
     else:
-        status = "Needs careful review"
+        status = "POTENTIAL NON-COMPLIANCE"
 
     return {
         "score": score,
         "status": status,
-        "allergens": allergens,
-        "warnings": warnings,
-        "ingredient_count": len(ingredients),
-        "text": original_text
+        "checks": checks,
+        "missing": missing,
+        "detected_count": found_count,
+        "total_checks": total,
+        "text": original_text,
+        "analysis_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "disclaimer": (
+            "Screening result only. Presence of text does not by itself "
+            "prove legal compliance. Final verification should be done "
+            "against the applicable Legal Metrology requirements."
+        )
     }
 
 
 def run_tesseract(image_path):
-    """
-    Try multiple OCR modes.
-    Returns the longest useful OCR result.
-    """
-
     results = []
 
     for psm in ["6", "11", "3"]:
@@ -142,16 +172,10 @@ def run_tesseract(image_path):
     if not results:
         return ""
 
-    # Usually the longest result contains more label text
     return max(results, key=len)
 
 
 def preprocess_image(original):
-    """
-    ImageMagick is optional.
-    If available, create a cleaner OCR image.
-    """
-
     magick = shutil.which("magick")
 
     if not magick:
@@ -166,7 +190,7 @@ def preprocess_image(original):
                 original,
                 "-auto-orient",
                 "-resize",
-                "220%",
+                "250%",
                 "-colorspace",
                 "Gray",
                 "-contrast-stretch",
@@ -197,29 +221,28 @@ def home():
 @app.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json(silent=True) or {}
-
     text = data.get("text", "")
 
     if not text.strip():
         return jsonify({
-            "error": "Please enter ingredient or label text."
+            "error": "Please enter packaged-product label text."
         }), 400
 
-    return jsonify(analyze_label(text))
+    return jsonify(analyze_compliance(text))
 
 
 @app.route("/ocr", methods=["POST"])
 def ocr():
     if "image" not in request.files:
         return jsonify({
-            "error": "No image selected."
+            "error": "No label image selected."
         }), 400
 
     image = request.files["image"]
 
     if not image.filename:
         return jsonify({
-            "error": "No image selected."
+            "error": "No label image selected."
         }), 400
 
     original = None
@@ -242,7 +265,6 @@ def ocr():
 
         text = run_tesseract(processed)
 
-        # If processed image produced nothing, try original
         if not text and processed != original:
             text = run_tesseract(original)
 
@@ -254,7 +276,7 @@ def ocr():
                 )
             }), 400
 
-        return jsonify(analyze_label(text))
+        return jsonify(analyze_compliance(text))
 
     except Exception as e:
         return jsonify({
