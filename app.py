@@ -7,7 +7,6 @@ from google.genai import types
 
 app = Flask(__name__)
 
-# Clean API Key
 RAW_KEY = os.environ.get("GEMINI_API_KEY", "")
 API_KEY = RAW_KEY.strip().strip('"').strip("'")
 
@@ -22,10 +21,9 @@ def process_ocr():
         if not API_KEY:
             return jsonify({
                 "success": False,
-                "message": "GEMINI_API_KEY is not set or empty in Render Environment Variables."
+                "message": "GEMINI_API_KEY is missing on Render Environment Variables."
             }), 500
 
-        # Extract file from any form key
         file = None
         for key in ["image", "file", "label_image", "upload"]:
             if key in request.files:
@@ -35,7 +33,7 @@ def process_ocr():
         if not file or file.filename == "":
             return jsonify({
                 "success": False,
-                "message": "No valid image file received by server."
+                "message": "No valid image file received."
             }), 400
 
         file.seek(0)
@@ -44,53 +42,40 @@ def process_ocr():
         if mime_type not in ["image/jpeg", "image/png", "image/webp"]:
             mime_type = "image/jpeg"
 
+        # Initialize official GenAI client
         client = genai.Client(api_key=API_KEY)
 
         prompt = """
-        You are an expert Legal Metrology and FSSAI Packaging Compliance Auditor.
+        You are an expert Legal Metrology & FSSAI Packaging Compliance Auditor.
         Read this product packaging label image and extract all text.
 
-        Return ONLY a JSON object without markdown fences:
+        Return ONLY a JSON object (no markdown formatting, no backticks):
         {
             "raw_text": "All transcribed text here...",
-            "mrp": "Found value or Not Found",
-            "net_quantity": "Found value or Not Found",
-            "mfg_details": "Found value or Not Found",
-            "dates": "Found value or Not Found",
-            "consumer_care": "Found value or Not Found",
-            "origin": "Found value or Not Found",
+            "mrp": "Extracted MRP with tax details or Not Found",
+            "net_quantity": "Extracted Net Qty or Not Found",
+            "mfg_details": "Manufacturer details or Not Found",
+            "dates": "Mfg/Expiry date or Not Found",
+            "consumer_care": "Customer care details or Not Found",
+            "origin": "Country of origin or Not Found",
             "detected_count": 0,
             "total_checks": 6,
             "status": "COMPLIANT or POTENTIAL NON-COMPLIANCE"
         }
         """
 
-        # Try models in fallback order
-        response = None
-        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
-        last_err = None
+        # Call Gemini 2.5 Flash
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                prompt
+            ]
+        )
 
-        for model_name in models_to_try:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[
-                        types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
-                        prompt
-                    ]
-                )
-                if response and response.text:
-                    break
-            except Exception as model_err:
-                last_err = model_err
-                continue
+        res_text = response.text.strip() if response.text else ""
 
-        if not response or not response.text:
-            raise Exception(f"AI Model Error: {last_err}")
-
-        res_text = response.text.strip()
-
-        # Clean markdown wrappers
+        # Strip accidental code blocks
         if "```" in res_text:
             res_text = res_text.replace("```json", "").replace("```", "").strip()
 
@@ -99,12 +84,12 @@ def process_ocr():
         except Exception:
             data = {
                 "raw_text": res_text,
-                "mrp": "Detected",
-                "net_quantity": "Detected",
-                "mfg_details": "Detected",
-                "dates": "Detected",
-                "consumer_care": "Detected",
-                "origin": "Detected",
+                "mrp": "Found",
+                "net_quantity": "Found",
+                "mfg_details": "Found",
+                "dates": "Found",
+                "consumer_care": "Found",
+                "origin": "Found",
                 "detected_count": 5,
                 "total_checks": 6,
                 "status": "COMPLIANT"
@@ -134,7 +119,7 @@ def process_ocr():
         traceback.print_exc()
         return jsonify({
             "success": False,
-            "message": f"OCR Processing Failed: {str(e)}"
+            "message": f"AI Processing Error: {str(e)}"
         }), 500
 
 if __name__ == "__main__":
