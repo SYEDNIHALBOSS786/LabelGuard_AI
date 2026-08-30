@@ -182,7 +182,7 @@ def run_tesseract(image_path):
         if not parsed:
             return ""
 
-        return "\\n".join(
+        return "\n".join(
             item.get("ParsedText", "")
             for item in parsed
         ).strip()
@@ -277,9 +277,9 @@ def ocr():
             image.save(temp.name)
             original = temp.name
 
-        processed = preprocess_image(original)
+        processed = original
 
-        text = run_tesseract(processed)
+        text = run_tesseract(original)
 
         if not text and processed != original:
             text = run_tesseract(original)
