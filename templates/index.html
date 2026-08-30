@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelGuard AI — Packaging Compliance Screener</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <title>LabelGuard AI — Packaging & Health Compliance Screener</title>
+    <link href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css)" rel="stylesheet">
+    <link href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css)" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #090d16;
             --card-bg: #111827;
             --card-border: #1f293d;
             --accent-blue: #3b82f6;
-            --accent-cyan: #06b6d4;
             --text-main: #f9fafb;
             --text-muted: #9ca3af;
         }
@@ -46,19 +45,51 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
+        .nav-pills .nav-link {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            margin: 0 5px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .nav-pills .nav-link.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
         .upload-area {
             border: 2px dashed #374151;
             border-radius: 14px;
-            padding: 35px 20px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.25s ease;
             background: rgba(17, 24, 39, 0.5);
         }
 
-        .upload-area:hover, .upload-area.dragover {
+        .upload-area:hover {
             border-color: var(--accent-blue);
             background: rgba(59, 130, 246, 0.05);
+        }
+
+        .custom-textarea {
+            background: #0b1120;
+            border: 1px solid #374151;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        .custom-textarea:focus {
+            background: #0b1120;
+            border-color: var(--accent-blue);
+            color: #fff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         .btn-gradient {
@@ -80,6 +111,13 @@
         .badge-pass { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-fail { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
+        .health-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
         .score-box {
             background: #1e293b;
             border-radius: 12px;
@@ -95,13 +133,12 @@
             border-radius: 10px;
             padding: 16px;
             font-size: 0.85rem;
-            max-height: 250px;
+            max-height: 200px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav class="navbar navbar-custom py-3 mb-4">
         <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#">
@@ -109,92 +146,142 @@
                 <span>LabelGuard <span class="text-info">AI</span></span>
             </a>
             <span class="badge hero-badge d-none d-sm-inline-block">
-                <i class="fa-solid fa-scale-balanced me-1"></i> FSSAI & Legal Metrology Screener
+                <i class="fa-solid fa-heart-pulse me-1"></i> Legal & Health Safety Screener
             </span>
         </div>
     </nav>
 
     <div class="container pb-5" style="max-width: 900px;">
         
-        <!-- Header / Banner -->
         <div class="text-center mb-4">
-            <span class="badge hero-badge mb-2">Automated Regulatory Compliance</span>
-            <h2 class="fw-bold">Smart Label Compliance Engine</h2>
-            <p class="text-secondary small">Upload packaging labels or snap a live photo to verify mandatory legal declarations in real-time.</p>
+            <span class="badge hero-badge mb-2">Automated Compliance & Ingredient Health</span>
+            <h2 class="fw-bold">Smart Label & Health Safety Screener</h2>
+            <p class="text-secondary small">Audit Legal Metrology rules, Allergens, Preservatives, High Sugar & Sodium in real-time.</p>
         </div>
 
-        <!-- Scanner Card -->
         <div class="custom-card p-4 mb-4">
-            <div class="upload-area" id="dropArea" onclick="document.getElementById('labelInput').click()">
-                <input type="file" id="labelInput" accept="image/*" class="d-none" onchange="handleImage(this)">
-                
-                <div id="uploadPrompt">
-                    <i class="fa-solid fa-cloud-arrow-up fs-1 text-primary mb-3"></i>
-                    <h5 class="fw-bold mb-1">Upload Product Label or Snap Photo</h5>
-                    <p class="text-muted small mb-0">Drag & Drop or browse (JPG, PNG, WEBP, Camera)</p>
+            
+            <ul class="nav nav-pills mb-3 justify-content-center" id="modeTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="image-tab" data-bs-toggle="pill" data-bs-target="#image-pane" type="button" role="tab">
+                        <i class="fa-solid fa-camera me-1"></i> Upload Image / Photo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="text-tab" data-bs-toggle="pill" data-bs-target="#text-pane" type="button" role="tab">
+                        <i class="fa-solid fa-keyboard me-1"></i> Type / Paste Text
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content pt-2" id="modeTabContent">
+                <div class="tab-pane fade show active" id="image-pane" role="tabpanel">
+                    <div class="upload-area" onclick="document.getElementById('labelInput').click()">
+                        <input type="file" id="labelInput" accept="image/*" class="d-none" onchange="handleImage(this)">
+                        
+                        <div id="uploadPrompt">
+                            <i class="fa-solid fa-cloud-arrow-up fs-1 text-primary mb-3"></i>
+                            <h5 class="fw-bold mb-1">Upload Product Label or Snap Photo</h5>
+                            <p class="text-muted small mb-0">Drag & Drop or browse (JPG, PNG, WEBP, Camera)</p>
+                        </div>
+
+                        <div id="previewContainer" class="d-none mt-2">
+                            <img id="imagePreview" class="img-fluid rounded-3 shadow" style="max-height: 240px; border: 1px solid #374151;" />
+                            <div class="mt-2 text-muted small"><i class="fa-solid fa-arrows-rotate me-1"></i> Click to change image</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="previewContainer" class="d-none mt-2">
-                    <img id="imagePreview" class="img-fluid rounded-3 shadow" style="max-height: 240px; border: 1px solid #374151;" />
-                    <div class="mt-2 text-muted small"><i class="fa-solid fa-arrows-rotate me-1"></i> Click to change image</div>
+                <div class="tab-pane fade" id="text-pane" role="tabpanel">
+                    <textarea id="rawTextInput" class="form-control custom-textarea" rows="6" placeholder="Paste or type product label text here (e.g. MRP ₹99.00 incl of all taxes, Net Qty: 500g, Ingredients: Sugar, Wheat Flour, Palm Oil, INS 621, Preservative 211, Contains: Peanuts, Soy, Milk)..."></textarea>
                 </div>
             </div>
 
-            <div class="d-flex gap-2 mt-3">
-                <button id="scanBtn" class="btn btn-gradient w-100" onclick="startVerification()">
-                    <i class="fa-solid fa-microchip me-2"></i> Verify Compliance
-                </button>
-            </div>
+            <button id="scanBtn" class="btn btn-gradient w-100 mt-3" onclick="startVerification()">
+                <i class="fa-solid fa-microchip me-2"></i> Audit Packaging & Health Safety
+            </button>
 
-            <!-- Loader -->
             <div id="loader" class="text-center py-3 d-none">
                 <div class="spinner-border text-info" role="status"></div>
                 <div class="text-info fw-semibold small mt-2">
-                    <i class="fa-solid fa-brain me-1"></i> Multimodal AI is auditing label rules...
+                    <i class="fa-solid fa-brain me-1"></i> Auditing compliance, allergens & ingredient risks...
                 </div>
             </div>
 
-            <!-- Error Banner -->
-            <div id="errorAlert" class="alert alert-danger mt-3 d-none small py-2" role="alert"></div>
+            <div id="errorAlert" class="alert alert-danger mt-3 d-none small py-2"></div>
         </div>
 
-        <!-- Result Dashboard -->
         <div id="resultsCard" class="custom-card p-4 d-none">
             <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-3 border-bottom border-secondary-subtle">
                 <div>
-                    <span class="text-muted text-uppercase small fw-bold">Compliance Status</span>
+                    <span class="text-muted text-uppercase small fw-bold">Compliance Verdict</span>
                     <h4 id="verdictHeading" class="fw-bold mb-0">--</h4>
                 </div>
                 <div class="score-box mt-2 mt-sm-0">
                     <span class="fs-4 fw-bold text-info" id="scoreValue">0/6</span>
-                    <div class="text-muted" style="font-size: 0.75rem;">Rules Verified</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Legal Rules Verified</div>
                 </div>
             </div>
 
-            <!-- Checks Audit Table -->
-            <h6 class="fw-bold text-info mb-3"><i class="fa-solid fa-list-check me-2"></i> Mandatory Declaration Breakdown</h6>
+            <div class="mb-4">
+                <h6 class="fw-bold text-warning mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i> Health, Allergen & Ingredient Warnings</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="health-card">
+                            <span class="text-muted small fw-bold"><i class="fa-solid fa-wheat-awn-circle-exclamation text-danger me-1"></i> Allergens Detected:</span>
+                            <div id="allergensBox" class="mt-1 text-light fw-semibold small">--</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="health-card">
+                            <span class="text-muted small fw-bold"><i class="fa-solid fa-flask text-warning me-1"></i> Preservatives & Additives (INS):</span>
+                            <div id="preservativesBox" class="mt-1 text-light fw-semibold small">--</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="health-card">
+                            <span class="text-muted small fw-bold"><i class="fa-solid fa-cubes-stacked text-info me-1"></i> Sugar Level:</span>
+                            <span id="sugarBadge" class="badge bg-secondary ms-2">--</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="health-card">
+                            <span class="text-muted small fw-bold"><i class="fa-solid fa-bowl-food text-info me-1"></i> Sodium / Salt Level:</span>
+                            <span id="sodiumBadge" class="badge bg-secondary ms-2">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="healthSummaryAlert" class="alert alert-dark border border-secondary mt-3 mb-0 small text-light"></div>
+            </div>
+
+            <h6 class="fw-bold text-info mb-3"><i class="fa-solid fa-list-check me-2"></i> Mandatory Legal Declarations</h6>
             <div class="table-responsive mb-4">
                 <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
                     <thead>
                         <tr class="text-secondary small">
-                            <th>Mandatory Requirement</th>
+                            <th>Requirement</th>
                             <th>Status</th>
                             <th>Detected Information</th>
-                            <th>Regulatory Guideline</th>
+                            <th>Guideline</th>
                         </tr>
                     </thead>
                     <tbody id="auditTableBody"></tbody>
                 </table>
             </div>
 
-            <!-- Transcribed Raw Text -->
-            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-file-lines me-2"></i> Transcribed OCR Text</h6>
+            <h6 class="fw-bold text-secondary mb-2"><i class="fa-solid fa-file-lines me-2"></i> Transcribed Text</h6>
             <pre id="rawTextDisplay" class="mb-0"></pre>
         </div>
 
     </div>
 
+    <script src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js)"></script>
     <script>
+        let currentMode = 'image';
+
+        document.getElementById('image-tab').addEventListener('shown.bs.tab', () => currentMode = 'image');
+        document.getElementById('text-tab').addEventListener('shown.bs.tab', () => currentMode = 'text');
+
         function handleImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -207,16 +294,36 @@
             }
         }
 
+        function getLevelBadge(level) {
+            const lvl = String(level).toUpperCase();
+            if (lvl === 'HIGH') return '<span class="badge bg-danger">HIGH RISK</span>';
+            if (lvl === 'MODERATE') return '<span class="badge bg-warning text-dark">MODERATE</span>';
+            if (lvl === 'LOW') return '<span class="badge bg-success">LOW / SAFE</span>';
+            return '<span class="badge bg-secondary">NOT STATED</span>';
+        }
+
         async function startVerification() {
-            const input = document.getElementById('labelInput');
+            const fileInput = document.getElementById('labelInput');
+            const textInput = document.getElementById('rawTextInput');
             const errorAlert = document.getElementById('errorAlert');
             const loader = document.getElementById('loader');
             const scanBtn = document.getElementById('scanBtn');
             const resultsCard = document.getElementById('resultsCard');
 
-            if (!input.files[0]) {
-                alert("Please select or capture a label image first!");
-                return;
+            const formData = new FormData();
+
+            if (currentMode === 'image') {
+                if (!fileInput.files[0]) {
+                    alert("Please select or capture a label image first!");
+                    return;
+                }
+                formData.append('image', fileInput.files[0]);
+            } else {
+                if (!textInput.value.trim()) {
+                    alert("Please type or paste some label text first!");
+                    return;
+                }
+                formData.append('text_input', textInput.value.trim());
             }
 
             errorAlert.classList.add('d-none');
@@ -224,33 +331,46 @@
             loader.classList.remove('d-none');
             scanBtn.disabled = true;
 
-            const formData = new FormData();
-            formData.append('image', input.files[0]);
-
             try {
                 const res = await fetch('/ocr', { method: 'POST', body: formData });
-                const data = await res.json();
+                const responseText = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch(parseErr) {
+                    throw new Error("Server responded with invalid data format. Please retry.");
+                }
 
                 if (!data.success) {
                     throw new Error(data.message || "Failed to process label.");
                 }
 
-                // Update Status
                 const isCompliant = data.status === 'COMPLIANT';
                 document.getElementById('verdictHeading').innerHTML = isCompliant 
                     ? `<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> COMPLIANT PRODUCT</span>`
                     : `<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> POTENTIAL NON-COMPLIANCE</span>`;
 
                 document.getElementById('scoreValue').innerText = `${data.detected_count}/${data.total_checks}`;
-                document.getElementById('rawTextDisplay').innerText = data.text || "No text detected.";
+                document.getElementById('rawTextDisplay').innerText = data.text || "No text provided.";
 
-                // Populate Table
+                // Health & Safety Render
+                const hs = data.health_safety || {};
+                const allergens = (hs.allergens && hs.allergens.length) ? hs.allergens.join(', ') : 'None Detected';
+                const preservatives = (hs.preservatives_additives && hs.preservatives_additives.length) ? hs.preservatives_additives.join(', ') : 'None Stated';
+
+                document.getElementById('allergensBox').innerText = allergens;
+                document.getElementById('preservativesBox').innerText = preservatives;
+                document.getElementById('sugarBadge').outerHTML = `<span id="sugarBadge">${getLevelBadge(hs.sugar_level)}</span>`;
+                document.getElementById('sodiumBadge').outerHTML = `<span id="sodiumBadge">${getLevelBadge(hs.sodium_level)}</span>`;
+                document.getElementById('healthSummaryAlert').innerHTML = `<i class="fa-solid fa-circle-info text-info me-2"></i><strong>Health Advisory:</strong> ${hs.health_warning || 'Ingredients appear standard.'}`;
+
+                // Legal Checks Table
                 const tbody = document.getElementById('auditTableBody');
                 tbody.innerHTML = "";
                 
                 if (data.checks && data.checks.length > 0) {
                     data.checks.forEach(item => {
-                        const isPass = item.status === 'PASS';
+                        const isPass = String(item.status).toUpperCase() === 'PASS';
                         tbody.innerHTML += `
                             <tr>
                                 <td class="fw-semibold text-light">${item.field}</td>

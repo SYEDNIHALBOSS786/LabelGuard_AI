@@ -28,8 +28,8 @@ def process_ocr():
         client = genai.Client(api_key=API_KEY)
 
         prompt_instruction = """
-        You are an expert Legal Metrology & FSSAI Packaging Compliance Auditor.
-        Analyze the packaging label details (from the provided image or text) and verify mandatory rules.
+        You are an expert Legal Metrology, FSSAI Packaging Compliance & Food Safety Auditor.
+        Analyze the packaging label details (from the provided image or text) and verify both Legal Compliance and Health/Safety Warnings.
 
         Return ONLY a JSON object with this exact structure:
         {
@@ -45,19 +45,19 @@ def process_ocr():
                     "field": "Net Quantity",
                     "status": "PASS or FAIL",
                     "found_value": "Extracted Net Qty or Not Detected",
-                    "feedback": "Declared in standard metric unit (g, kg, ml, l, N)"
+                    "feedback": "Declared in standard metric unit"
                 },
                 {
-                    "field": "Manufacturer / Packer Details",
+                    "field": "Manufacturer Details",
                     "status": "PASS or FAIL",
                     "found_value": "Extracted Name & Address or Not Detected",
                     "feedback": "Full manufacturer name and address required"
                 },
                 {
-                    "field": "Manufacturing / Expiry Date",
+                    "field": "Mfg / Expiry Date",
                     "status": "PASS or FAIL",
                     "found_value": "Extracted Dates or Not Detected",
-                    "feedback": "Date of manufacturing or Use By/Expiry date"
+                    "feedback": "Date of manufacturing or Best Before/Expiry"
                 },
                 {
                     "field": "Consumer Care Details",
@@ -72,8 +72,15 @@ def process_ocr():
                     "feedback": "Country of origin declaration"
                 }
             ],
+            "health_safety": {
+                "allergens": ["List of detected allergens like Nuts, Dairy, Gluten, Soy or 'None Detected'"],
+                "preservatives_additives": ["List of detected INS numbers, artificial colors, preservatives or 'Standard/None'"],
+                "sugar_level": "HIGH / MODERATE / LOW / NOT_MENTIONED",
+                "sodium_level": "HIGH / MODERATE / LOW / NOT_MENTIONED",
+                "health_warning": "Clear brief health summary (e.g. High in added sugars, contains allergens: Peanuts)."
+            },
             "overall_status": "COMPLIANT or NON_COMPLIANCE",
-            "summary": "Brief verdict"
+            "summary": "Brief overall verdict"
         }
         """
 
@@ -108,7 +115,6 @@ def process_ocr():
                 prompt_instruction
             ]
 
-        # Enforce strict JSON output from Gemini
         config = types.GenerateContentConfig(
             response_mime_type="application/json"
         )
@@ -121,7 +127,6 @@ def process_ocr():
 
         res_text = response.text.strip() if response.text else "{}"
 
-        # Clean any unintended markdown
         if "```" in res_text:
             res_text = re.sub(r"^```[a-zA-Z]*\n?", "", res_text)
             res_text = re.sub(r"```$", "", res_text).strip()
@@ -132,6 +137,13 @@ def process_ocr():
             data = {
                 "raw_text": raw_input_text if raw_input_text else res_text,
                 "checks": [],
+                "health_safety": {
+                    "allergens": ["None Detected"],
+                    "preservatives_additives": ["None"],
+                    "sugar_level": "NOT_MENTIONED",
+                    "sodium_level": "NOT_MENTIONED",
+                    "health_warning": "Could not analyze nutritional parameters."
+                },
                 "overall_status": "COMPLIANT"
             }
 
@@ -143,6 +155,7 @@ def process_ocr():
             "success": True,
             "text": data.get("raw_text", raw_input_text),
             "checks": checks,
+            "health_safety": data.get("health_safety", {}),
             "detected_count": pass_count,
             "total_checks": total_checks,
             "status": "COMPLIANT" if pass_count >= 5 else "POTENTIAL NON-COMPLIANCE",
