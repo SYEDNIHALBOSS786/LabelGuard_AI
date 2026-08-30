@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelGuard AI — Next-Gen Regulatory & Food Safety Screener</title>
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>LabelGuard AI — Ultra Pro Compliance & Food Safety Screener</title>
+    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css)">
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)">
     
     <style>
         :root {
@@ -42,7 +41,7 @@
         }
 
         .navbar-custom {
-            background: rgba(13, 19, 34, 0.8);
+            background: rgba(13, 19, 34, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-subtle);
@@ -63,7 +62,6 @@
             box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .hero-pill {
@@ -100,7 +98,7 @@
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
         }
 
-        /* Upload Container with Laser Scan Animation */
+        /* AI Laser Scanning Beam */
         .upload-dropzone {
             border: 2px dashed rgba(56, 189, 248, 0.3);
             border-radius: 16px;
@@ -119,7 +117,6 @@
             transform: translateY(-2px);
         }
 
-        /* AI Laser Scanning Beam */
         .scanner-active .laser-line {
             display: block !important;
             position: absolute;
@@ -171,7 +168,6 @@
             color: #fff;
         }
 
-        /* Cards and Badges */
         .stat-badge-box {
             background: var(--surface-2);
             border: 1px solid var(--border-subtle);
@@ -229,26 +225,18 @@
             overflow-y: auto;
         }
 
-        /* Smooth Slide-up Entrance Animation */
         .animate-reveal {
             animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes slideUpFade {
-            from {
-                opacity: 0;
-                transform: translateY(25px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav class="navbar navbar-custom py-3 mb-4 sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="#">
@@ -257,16 +245,20 @@
                 </div>
                 <span class="brand-logo fs-4">LabelGuard AI</span>
             </a>
-            <span class="hero-pill d-none d-sm-inline-flex align-items-center gap-2">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
-                Enterprise Compliance Engine v3.0
-            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1" onclick="runErrorDetector()" style="font-size: 0.75rem;">
+                    <i class="fa-solid fa-stethoscope me-1"></i> Check Engine Health
+                </button>
+                <span class="hero-pill d-none d-sm-inline-flex align-items-center gap-2">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
+                    Active
+                </span>
+            </div>
         </div>
     </nav>
 
     <div class="container pb-5" style="max-width: 950px;">
         
-        <!-- Header -->
         <div class="text-center mb-4 pt-2">
             <span class="hero-pill mb-3 d-inline-block">
                 <i class="fa-solid fa-bolt text-warning me-1"></i> Legal Metrology & Food Health AI
@@ -279,9 +271,7 @@
             </p>
         </div>
 
-        <!-- Main Card -->
         <div class="glass-card p-4 mb-4">
-            
             <div class="text-center mb-4">
                 <div class="nav-pills-custom" id="modeTab" role="tablist">
                     <button class="nav-link active" id="image-tab" data-bs-toggle="pill" data-bs-target="#image-pane" type="button" role="tab">
@@ -294,7 +284,6 @@
             </div>
 
             <div class="tab-content" id="modeTabContent">
-                <!-- Image Mode -->
                 <div class="tab-pane fade show active" id="image-pane" role="tabpanel">
                     <div class="upload-dropzone" id="dropArea" onclick="document.getElementById('labelInput').click()">
                         <div class="laser-line d-none" id="laserBeam"></div>
@@ -305,7 +294,7 @@
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                             </div>
                             <h5 class="fw-bold mb-1">Click to Upload or Snap Label</h5>
-                            <p class="text-secondary small mb-0">High-precision OCR processes JPG, PNG, WEBP</p>
+                            <p class="text-secondary small mb-0">High-precision OCR processes JPG, PNG, WEBP (Up to 16MB)</p>
                         </div>
 
                         <div id="previewContainer" class="d-none position-relative">
@@ -317,7 +306,6 @@
                     </div>
                 </div>
 
-                <!-- Text Mode -->
                 <div class="tab-pane fade" id="text-pane" role="tabpanel">
                     <textarea id="rawTextInput" class="form-control custom-textarea" rows="6" placeholder="Paste product label details here (e.g., MRP ₹99.00 incl. of all taxes, Net Wt: 400g, Mfg: 09/2024, Ingredients: Sugar, Refined Flour, Palm Oil, Preservative 211, INS 621, Contains Wheat, Soy)..."></textarea>
                 </div>
@@ -328,7 +316,6 @@
                 <span>Audit Product Compliance & Safety</span>
             </button>
 
-            <!-- Loader -->
             <div id="loader" class="text-center py-4 d-none">
                 <div class="spinner-border text-info mb-2" role="status" style="width: 2.2rem; height: 2.2rem;"></div>
                 <div class="text-info fw-semibold small">
@@ -339,9 +326,7 @@
             <div id="errorAlert" class="alert alert-danger mt-3 d-none small py-2 rounded-3"></div>
         </div>
 
-        <!-- Animated Dashboard Results -->
         <div id="resultsCard" class="glass-card p-4 d-none">
-            
             <div class="row align-items-center g-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
                 <div class="col-md-7">
                     <span class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Audited Verdict</span>
@@ -356,7 +341,6 @@
                 </div>
             </div>
 
-            <!-- Health Risk Matrix -->
             <div class="mb-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <i class="fa-solid fa-heart-pulse text-danger"></i>
@@ -404,7 +388,6 @@
                 <div id="healthSummaryAlert" class="alert mt-3 mb-0 small" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); color: #cbd5e1;"></div>
             </div>
 
-            <!-- Declarations Table -->
             <div class="mb-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <i class="fa-solid fa-scale-balanced text-primary"></i>
@@ -426,19 +409,17 @@
                 </div>
             </div>
 
-            <!-- OCR Terminal -->
             <div>
                 <span class="text-secondary small fw-bold mb-2 d-inline-block">
                     <i class="fa-solid fa-terminal me-1 text-info"></i> Raw Extracted OCR Stream
                 </span>
                 <div id="rawTextDisplay" class="terminal-box"></div>
             </div>
-
         </div>
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js)"></script>
     <script>
         let currentMode = 'image';
 
@@ -469,6 +450,21 @@
                 return '<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4);"><i class="fa-solid fa-check me-1"></i> OPTIMAL / LOW</span>';
             }
             return '<span class="badge bg-secondary text-light">NOT STATED</span>';
+        }
+
+        // Live Health & Error Detector
+        async function runErrorDetector() {
+            try {
+                const res = await fetch('/api/health-check');
+                const diag = await res.json();
+                if (diag.gemini_api_key_configured) {
+                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Engine is 100% Ready!`);
+                } else {
+                    alert(`⚠️ KEY NOT FOUND\nGEMINI_API_KEY Render par missing hai. Please Render settings mein jaakar key save karein.`);
+                }
+            } catch (err) {
+                alert(`❌ Server Connection Failed: ${err.message}`);
+            }
         }
 
         async function startVerification() {
