@@ -1,13 +1,14 @@
 import os
+import io
+import traceback
 from flask import Flask, request, jsonify, render_template
-import google.generativeai as genai
+from google import genai
 from PIL import Image
 
 app = Flask(__name__)
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Official Gemini Client
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 @app.route("/")
 def index():
@@ -16,24 +17,43 @@ def index():
 @app.route("/ocr", methods=["POST"])
 def process_ocr():
     try:
-        if "image" not in request.files:
-            return jsonify({"success": False, "message": "No image uploaded"}), 400
+        if not API_KEY:
+            return jsonify({
+                "success": False,
+                "message": "GEMINI_API_KEY missing in Render environment variables."
+            }), 500
 
-        file = request.files["image"]
-        if file.filename == "":
-            return jsonify({"success": False, "message": "Empty file"}), 400
+        # Check all possible image keys from form data
+        file = None
+        for key in ["image", "file", "label_image", "upload"]:
+            if key in request.files:
+                file = request.files[key]
+                break
+
+        if not file or file.filename == "":
+            return jsonify({
+                "success": False,
+                "message": "No valid image uploaded."
+            }), 400
 
         file.seek(0)
-        image = Image.open(file.stream)
+        img_bytes = file.read()
+        image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
 
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # Init modern Gemini client
+        client = genai.Client(api_key=API_KEY)
+        
         prompt = (
-            "Extract all printed text from this product label accurately. "
-            "Include MRP, Net Quantity, Dates, Manufacturer details, and all visible text. "
-            "Do not add extra explanation, only return the extracted text."
+            "Extract and transcribe all text printed on this product packaging label accurately. "
+            "Include MRP, Net Quantity, Dates, Manufacturer details, Ingredients, and all visible text. "
+            "Return only the extracted text without introductory phrases or markdown ticks."
         )
 
-        response = model.generate_content([prompt, image])
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[prompt, image]
+        )
+
         extracted_text = response.text.strip() if response.text else ""
 
         if not extracted_text:
@@ -48,9 +68,10 @@ def process_ocr():
         }), 200
 
     except Exception as e:
+        traceback.print_exc()
         return jsonify({
             "success": False,
-            "message": "Could not read the label. Take a closer, brighter and sharper photo.",
+            "message": "OCR Processing Failed.",
             "error_detail": str(e)
         }), 500
 
