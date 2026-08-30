@@ -94,8 +94,9 @@ def process_ocr():
         }
         """
 
+        # Using the active model: gemini-3.6-flash
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=[
                 types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
                 prompt
@@ -116,7 +117,6 @@ def process_ocr():
                 "overall_status": "COMPLIANT"
             }
 
-        # Calculate pass score
         checks = data.get("checks", [])
         pass_count = sum(1 for c in checks if c.get("status") == "PASS")
         total_checks = len(checks) if checks else 6
