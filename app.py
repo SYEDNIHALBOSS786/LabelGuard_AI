@@ -141,39 +141,49 @@ def analyze_compliance(text):
 
 
 def run_tesseract(image_path):
-    results = []
+    import os
+    import requests
 
-    for psm in ["6", "11", "3"]:
-        try:
-            result = subprocess.run(
-                [
-                    "tesseract",
-                    image_path,
-                    "stdout",
-                    "--psm",
-                    psm,
-                    "-l",
-                    "eng"
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+    api_key = os.getenv("OCR_SPACE_API_KEY")
 
-            if result.returncode == 0:
-                text = result.stdout.strip()
-
-                if text:
-                    results.append(text)
-
-        except Exception:
-            pass
-
-    if not results:
+    if not api_key:
         return ""
 
-    return max(results, key=len)
+    try:
+        with open(image_path, "rb") as f:
+            response = requests.post(
+                "https://api.ocr.space/parse/image",
+                files={"filename": f},
+                data={
+                    "apikey": api_key,
+                    "language": "eng",
+                    "isOverlayRequired": "false",
+                    "OCREngine": "2",
+                    "scale": "true"
+                },
+                timeout=60
+            )
 
+        if response.status_code != 200:
+            return ""
+
+        data = response.json()
+
+        if data.get("IsErroredOnProcessing"):
+            return ""
+
+        parsed = data.get("ParsedResults", [])
+
+        if not parsed:
+            return ""
+
+        return "\\n".join(
+            item.get("ParsedText", "")
+            for item in parsed
+        ).strip()
+
+    except Exception:
+        return ""
 
 def preprocess_image(original):
     magick = shutil.which("magick")
