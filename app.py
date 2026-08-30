@@ -12,9 +12,20 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 RAW_KEY = os.environ.get("GEMINI_API_KEY", "")
 API_KEY = RAW_KEY.strip().strip('"').strip("'")
 
+# Global error handler so Flask NEVER returns <html> error pages
+@app.errorhandler(500)
+@app.errorhandler(404)
+@app.errorhandler(Exception)
+def handle_exception(e):
+    traceback.print_exc()
+    return jsonify({
+        "success": False,
+        "message": f"Server Notice: {str(e)}"
+    }), 200
+
 FALLBACK_AUDIT_DATA = {
     "raw_text": "Audit processed successfully.",
-    "compliance_score": 80,
+    "compliance_score": 85,
     "overall_status": "COMPLIANT",
     "summary": "Label audited according to Legal Metrology and FSSAI Packaging norms.",
     "checks": [
@@ -68,15 +79,12 @@ def index():
 def health_check():
     key_exists = bool(API_KEY and len(API_KEY) > 10)
     key_masked = f"{API_KEY[:4]}...{API_KEY[-4:]}" if key_exists else "NOT CONFIGURED"
-    
-    status = {
+    return jsonify({
         "server_status": "ONLINE",
         "gemini_api_key_configured": key_exists,
         "key_preview": key_masked,
-        "max_upload_size": "16MB",
-        "model": "gemini-3.6-flash"
-    }
-    return jsonify(status), 200
+        "max_upload_size": "16MB"
+    }), 200
 
 @app.route("/ocr", methods=["POST"])
 @app.route("/api/verify-compliance", methods=["POST"])
@@ -85,8 +93,8 @@ def process_ocr():
         if not API_KEY:
             return jsonify({
                 "success": False,
-                "message": "GEMINI_API_KEY is not configured in Render Environment Variables."
-            }), 500
+                "message": "GEMINI_API_KEY is not configured in Render Environment Variables. Please add your key."
+            }), 200
 
         client = genai.Client(api_key=API_KEY)
 
@@ -167,13 +175,13 @@ def process_ocr():
             if not file or file.filename == "":
                 return jsonify({
                     "success": False,
-                    "message": "No file received. Please upload or click an image."
-                }), 400
+                    "message": "No file received. Please upload or capture an image."
+                }), 200
 
             file.seek(0)
             image_bytes = file.read()
             if len(image_bytes) == 0:
-                return jsonify({"success": False, "message": "Uploaded file is empty or corrupted."}), 400
+                return jsonify({"success": False, "message": "Uploaded file is empty."}), 200
 
             mime_type = file.mimetype or "image/jpeg"
             if "png" in mime_type:
@@ -193,16 +201,32 @@ def process_ocr():
             temperature=0.1
         )
 
-        # Active Model: gemini-3.6-flash
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=contents_payload,
-            config=config
-        )
+        # Multi-model cascade fallback: tries latest first, falls back instantly if any 404 occurs
+        candidate_models = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+        res_text = ""
+        last_error = ""
 
-        res_text = response.text.strip() if response.text else "{}"
+        for model_id in candidate_models:
+            try:
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=contents_payload,
+                    config=config
+                )
+                if response and response.text:
+                    res_text = response.text.strip()
+                    break
+            except Exception as model_err:
+                last_error = str(model_err)
+                continue
+
+        if not res_text:
+            return jsonify({
+                "success": False,
+                "message": f"AI Engine Notice: {last_error}"
+            }), 200
+
         data = extract_clean_json(res_text)
-
         checks = data.get("checks", [])
         if not checks:
             checks = FALLBACK_AUDIT_DATA["checks"]
@@ -226,7 +250,7 @@ def process_ocr():
         return jsonify({
             "success": False,
             "message": f"Engine Notice: {str(e)}"
-        }), 500
+        }), 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

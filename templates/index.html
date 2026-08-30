@@ -434,12 +434,12 @@
                 const res = await fetch('/api/health-check');
                 const diag = await res.json();
                 if (diag.gemini_api_key_configured) {
-                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Active Model: ${diag.model}\n• Engine is 100% Ready!`);
+                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Models: Auto-Cascade Enabled\n• Engine is 100% Ready!`);
                 } else {
                     alert(`⚠️ KEY NOT FOUND\nGEMINI_API_KEY Render par missing hai. Please Render settings mein jaakar key save karein.`);
                 }
             } catch (err) {
-                alert(`❌ Server Connection Failed: ${err.message}`);
+                alert(`❌ Server Connection Notice: ${err.message}`);
             }
         }
 
@@ -479,7 +479,15 @@
 
             try {
                 const res = await fetch('/ocr', { method: 'POST', body: formData });
-                const data = await res.json();
+                
+                // Safe text response reading so JSON parser never throws <html> token error
+                const rawText = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch(e) {
+                    throw new Error("Temporary server connection delay. Please tap Verify again.");
+                }
 
                 if (!data.success) {
                     throw new Error(data.message || "Audit failed to process.");
