@@ -165,11 +165,13 @@ def run_tesseract(image_path):
             )
 
         if response.status_code != 200:
+            print("OCR API HTTP error:", response.status_code, response.text[:500])
             return ""
 
         data = response.json()
 
         if data.get("IsErroredOnProcessing"):
+            print("OCR API processing error:", data.get("ErrorMessage"))
             return ""
 
         parsed = data.get("ParsedResults", [])
@@ -182,7 +184,8 @@ def run_tesseract(image_path):
             for item in parsed
         ).strip()
 
-    except Exception:
+    except Exception as e:
+        print("OCR API exception:", type(e).__name__, str(e))
         return ""
 
 def preprocess_image(original):
