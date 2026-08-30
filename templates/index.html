@@ -3,151 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelGuard AI — Product Compliance Screener</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>LabelGuard AI</title>
+    <link href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css)" rel="stylesheet">
     <style>
-        :root { --bg: #0b0f19; --card-bg: #151c2e; --accent: #3b82f6; --text: #f3f4f6; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .hero-badge { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .card-custom { background: var(--card-bg); border: 1px solid #243049; border-radius: 14px; }
-        .upload-zone { border: 2px dashed #3b82f6; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .upload-zone:hover { background: rgba(59, 130, 246, 0.05); }
-        .badge-pass { background: #065f46; color: #34d399; }
-        .badge-fail { background: #7f1d1d; color: #f87171; }
-        .score-pill { font-size: 2rem; font-weight: 700; }
-        pre { background: #070a12; color: #cbd5e1; border-radius: 8px; padding: 14px; font-size: 0.85rem; max-height: 250px; }
+        body { background: #0f172a; color: #f8fafc; font-family: sans-serif; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
+        .upload-box { border: 2px dashed #38bdf8; border-radius: 10px; padding: 25px; text-align: center; cursor: pointer; }
+        .upload-box:hover { background: rgba(56, 189, 248, 0.05); }
+        pre { background: #020617; color: #38bdf8; padding: 12px; border-radius: 8px; white-space: pre-wrap; }
     </style>
 </head>
-<body>
-    <div class="container py-4" style="max-width: 900px;">
+<body class="py-4">
+    <div class="container" style="max-width: 700px;">
         <div class="text-center mb-4">
-            <span class="badge hero-badge px-3 py-2 rounded-pill mb-2">Automated Legal Metrology & FSSAI AI</span>
-            <h2 class="fw-bold">LabelGuard AI Screener</h2>
-            <p class="text-secondary">Instant AI-powered validation of mandatory consumer package declarations</p>
+            <h2 class="fw-bold text-info">🛡️ LabelGuard AI</h2>
+            <p class="text-secondary">Instant Legal Metrology & FSSAI Compliance Checker</p>
         </div>
 
-        <div class="card card-custom p-4 shadow-lg mb-4">
-            <div class="upload-zone" onclick="document.getElementById('imageFile').click()">
-                <input type="file" id="imageFile" accept="image/*" class="d-none" onchange="previewImage(this)">
-                <div id="uploadPrompt">
-                    <h5 class="mb-1">📸 Upload or Capture Product Label</h5>
-                    <p class="text-secondary small mb-0">PNG, JPG, or WEBP packaging photos</p>
-                </div>
-                <img id="imagePreview" class="d-none img-fluid rounded mt-2" style="max-height: 220px;" />
+        <div class="card p-4 shadow-lg mb-4">
+            <div class="upload-box" onclick="document.getElementById('labelImg').click()">
+                <input type="file" id="labelImg" accept="image/*" class="d-none" onchange="showPreview(this)">
+                <h6 class="mb-1 text-light">📸 Click to Upload Product Label</h6>
+                <small class="text-secondary">Supports JPG, PNG, WEBP</small>
+                <img id="preview" class="img-fluid rounded mt-3 d-none" style="max-height: 200px;">
             </div>
-            
-            <button id="scanBtn" class="btn btn-primary w-100 mt-3 py-2 fw-semibold" onclick="processScan()">
-                🔍 Verify Compliance
+
+            <button id="scanBtn" class="btn btn-primary w-100 mt-3 py-2 fw-bold" onclick="startScan()">
+                🔍 Check Compliance
             </button>
-            <div id="loader" class="text-center mt-3 d-none text-info small">Processing image through Vision AI & Compliance Engine...</div>
+            <div id="loader" class="text-center mt-3 d-none text-warning">🤖 Scanning Label via Multimodal AI...</div>
+            <div id="errorMsg" class="alert alert-danger mt-3 d-none small"></div>
         </div>
 
-        <!-- Result Section -->
-        <div id="resultContainer" class="d-none">
-            <div class="card card-custom p-4 mb-4">
+        <!-- Output Results -->
+        <div id="resultBox" class="d-none">
+            <div class="card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <span class="text-secondary small text-uppercase">Screening Result</span>
-                        <h4 id="verdictText" class="fw-bold mb-0">--</h4>
-                    </div>
-                    <div class="text-end">
-                        <span class="score-pill" id="scoreDisplay">0/6</span>
-                        <div class="text-secondary small">Checks Passed</div>
-                    </div>
+                    <h5 id="statusHeader" class="fw-bold mb-0"></h5>
+                    <span class="badge bg-info fs-6" id="scoreBadge"></span>
                 </div>
 
-                <h6 class="fw-bold mt-3 mb-2 text-info">Declaration Field Audit</h6>
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle mb-0">
-                        <thead>
-                            <tr class="text-secondary small">
-                                <th>Mandatory Field</th>
-                                <th>Status</th>
-                                <th>Extracted Value</th>
-                                <th>Rule Feedback</th>
-                            </tr>
-                        </thead>
-                        <tbody id="checksBody"></tbody>
-                    </table>
-                </div>
-
-                <h6 class="fw-bold mt-4 mb-2 text-secondary">Transcribed Label Content</h6>
-                <pre id="rawTextOutput" class="mb-0"></pre>
+                <h6 class="text-secondary fw-semibold mt-2">Detected Label Text:</h6>
+                <pre id="textOutput"></pre>
             </div>
         </div>
     </div>
 
     <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
+        function showPreview(input) {
+            if(input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('imagePreview').src = e.target.result;
-                    document.getElementById('imagePreview').classList.remove('d-none');
-                    document.getElementById('uploadPrompt').classList.add('d-none');
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').classList.remove('d-none');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        async function processScan() {
-            const fileInput = document.getElementById('imageFile');
-            if (!fileInput.files[0]) {
-                alert("Please select a label photo first!");
+        async function startScan() {
+            const fileInput = document.getElementById('labelImg');
+            const errorMsg = document.getElementById('errorMsg');
+            const loader = document.getElementById('loader');
+            const scanBtn = document.getElementById('scanBtn');
+            const resultBox = document.getElementById('resultBox');
+
+            if(!fileInput.files[0]) {
+                alert("Please select an image first!");
                 return;
             }
 
-            const scanBtn = document.getElementById('scanBtn');
-            const loader = document.getElementById('loader');
-            const resultContainer = document.getElementById('resultContainer');
-            
-            scanBtn.disabled = true;
+            errorMsg.classList.add('d-none');
+            resultBox.classList.add('d-none');
             loader.classList.remove('d-none');
-            resultContainer.classList.add('d-none');
+            scanBtn.disabled = true;
 
             const formData = new FormData();
             formData.append('image', fileInput.files[0]);
 
             try {
-                const res = await fetch('/api/verify-compliance', { method: 'POST', body: formData });
+                const res = await fetch('/ocr', { method: 'POST', body: formData });
                 const data = await res.json();
 
-                if (!data.success) {
-                    alert(data.message || "Error processing image.");
+                if(!data.success) {
+                    errorMsg.innerText = data.message || "Could not read label.";
+                    errorMsg.classList.remove('d-none');
                     return;
                 }
 
-                // Render Summary
-                const isCompliant = data.overall_status === 'COMPLIANT';
-                document.getElementById('verdictText').innerHTML = isCompliant 
-                    ? `<span class="text-success">✅ COMPLIANT PRODUCT</span>`
+                document.getElementById('textOutput').innerText = data.text || "No text found.";
+                document.getElementById('scoreBadge').innerText = `${data.detected_count} / ${data.total_checks} Passed`;
+                document.getElementById('statusHeader').innerHTML = data.status === 'COMPLIANT' 
+                    ? `<span class="text-success">✅ COMPLIANT</span>` 
                     : `<span class="text-warning">⚠️ POTENTIAL NON-COMPLIANCE</span>`;
-                
-                document.getElementById('scoreDisplay').innerText = `${data.detected_count}/${data.total_checks}`;
-                document.getElementById('rawTextOutput').innerText = data.text || "No raw text detected.";
 
-                // Render Table Rows
-                const tbody = document.getElementById('checksBody');
-                tbody.innerHTML = "";
-                if (data.checks && data.checks.length > 0) {
-                    data.checks.forEach(c => {
-                        const isPass = c.status === 'PASS';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="fw-semibold">${c.field}</td>
-                                <td><span class="badge ${isPass ? 'badge-pass' : 'badge-fail'} px-2 py-1">${c.status}</span></td>
-                                <td class="small ${isPass ? 'text-light' : 'text-danger'}">${c.found_value || 'Not Detected'}</td>
-                                <td class="small text-secondary">${c.feedback || '-'}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                resultContainer.classList.remove('d-none');
-            } catch (err) {
-                alert("Scan request failed: " + err.message);
+                resultBox.classList.remove('d-none');
+            } catch(e) {
+                errorMsg.innerText = "Error connecting to server: " + e.message;
+                errorMsg.classList.remove('d-none');
             } finally {
-                scanBtn.disabled = false;
                 loader.classList.add('d-none');
+                scanBtn.disabled = false;
             }
         }
     </script>
