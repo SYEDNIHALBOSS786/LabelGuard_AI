@@ -3,28 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelGuard AI</title>
+    <title>LabelGuard AI — FSSAI & Legal Metrology Screener</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #050811; color: #f8fafc; font-family: system-ui, sans-serif; min-height: 100vh; }
-        .glass-card { background: #0d1322; border: 1px solid #1f293d; border-radius: 16px; }
+        body { background: #050811; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+        .navbar-custom { background: #0d1322; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .hero-pill { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.8rem; padding: 5px 14px; border-radius: 50px; font-weight: 600; }
+        .glass-card { background: #0d1322; border: 1px solid #1f293d; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         .nav-link { color: #94a3b8; border-radius: 8px; font-weight: 600; }
         .nav-link.active { background: linear-gradient(135deg, #2563eb, #06b6d4) !important; color: #fff !important; }
-        .upload-dropzone { border: 2px dashed #06b6d4; border-radius: 14px; padding: 25px; text-align: center; cursor: pointer; position: relative; }
+        .upload-dropzone { border: 2px dashed #06b6d4; border-radius: 14px; padding: 25px; text-align: center; cursor: pointer; position: relative; overflow: hidden; }
         .scanner-active .laser-line { display: block !important; position: absolute; left: 0; right: 0; height: 3px; background: #00f0ff; box-shadow: 0 0 15px #00f0ff; animation: scan 2s infinite alternate; }
         @keyframes scan { 0% { top: 5%; } 100% { top: 90%; } }
         .btn-launch { background: linear-gradient(135deg, #2563eb, #06b6d4); border: none; color: #fff; font-weight: 700; padding: 12px; border-radius: 10px; }
         .pill-pass { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
         .pill-fail { background: rgba(244,63,94,0.2); color: #fb7185; border: 1px solid rgba(244,63,94,0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
         pre { background: #030712; color: #38bdf8; border: 1px solid #1f293d; border-radius: 10px; padding: 12px; font-size: 0.85rem; max-height: 200px; }
+        .mini-card { background: #090e1c; border: 1px solid #1f293d; border-radius: 10px; padding: 12px; }
     </style>
 </head>
-<body class="p-3">
+<body class="pb-5">
+
+    <!-- Top Navbar with FSSAI & Legal Metrology Branding -->
+    <nav class="navbar navbar-custom py-3 mb-4 sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand d-flex align-items-center gap-2 m-0 text-white fw-bold" href="#">
+                <div style="background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-shield-halved text-white"></i>
+                </div>
+                <span>LabelGuard <span class="text-info">AI</span></span>
+            </a>
+            <span class="hero-pill">
+                <i class="fa-solid fa-scale-balanced me-1 text-warning"></i> FSSAI & Legal Metrology Screener
+            </span>
+        </div>
+    </nav>
+
     <div class="container" style="max-width: 850px;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-bold m-0 text-info"><i class="fa-solid fa-shield-halved me-2"></i>LabelGuard AI</h4>
-            <span class="badge bg-success">Online</span>
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">Smart Packaging & Health Safety Screener</h3>
+            <p class="text-secondary small">Audit mandatory Legal Metrology rules, Allergens, INS Additives & Harmful Substances.</p>
         </div>
 
         <div class="glass-card p-4 mb-4">
@@ -38,8 +57,8 @@
                     <div class="upload-dropzone" id="dropArea" onclick="document.getElementById('labelInput').click()">
                         <div class="laser-line d-none" id="laserBeam"></div>
                         <input type="file" id="labelInput" accept="image/*" class="d-none" onchange="handleImage(this)">
-                        <div id="uploadPrompt"><i class="fa-solid fa-cloud-arrow-up fs-2 text-info mb-2"></i><br>Upload Label Image / Photo</div>
-                        <div id="previewContainer" class="d-none"><img id="imagePreview" class="img-fluid rounded" style="max-height: 200px;" /></div>
+                        <div id="uploadPrompt"><i class="fa-solid fa-cloud-arrow-up fs-2 text-info mb-2"></i><br><span class="fw-bold">Upload Product Label or Snap Photo</span><br><span class="text-secondary small">Supports JPG, PNG, WEBP</span></div>
+                        <div id="previewContainer" class="d-none"><img id="imagePreview" class="img-fluid rounded" style="max-height: 220px;" /></div>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="txt-pane">
@@ -47,34 +66,38 @@
                 </div>
             </div>
 
-            <button id="scanBtn" class="btn btn-launch w-100 mt-3" onclick="startAudit()"><i class="fa-solid fa-bolt me-1"></i> Audit Compliance & Health</button>
-            <div id="loader" class="text-center py-3 d-none text-info"><div class="spinner-border spinner-border-sm me-2"></div>Auditing parameters...</div>
+            <button id="scanBtn" class="btn btn-launch w-100 mt-3" onclick="startAudit()"><i class="fa-solid fa-microchip me-1"></i> Audit Compliance, Allergens & Additives</button>
+            <div id="loader" class="text-center py-3 d-none text-info"><div class="spinner-border spinner-border-sm me-2"></div>Scanning Metrology & Chemical Parameters...</div>
             <div id="errorAlert" class="alert alert-danger mt-3 d-none py-2 small"></div>
         </div>
 
+        <!-- Result Dashboard -->
         <div id="resultsCard" class="glass-card p-4 d-none">
             <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
-                <div><span class="text-secondary small">VERDICT</span><h4 id="verdictHeading" class="m-0 fw-bold">--</h4></div>
+                <div><span class="text-secondary small fw-bold">COMPLIANCE VERDICT</span><h4 id="verdictHeading" class="m-0 fw-bold">--</h4></div>
                 <div class="text-end"><span class="fs-4 fw-bold text-info" id="scoreValue">6/6</span><br><span class="text-secondary small">Rules Verified</span></div>
             </div>
 
-            <h6 class="text-warning fw-bold mb-2"><i class="fa-solid fa-heart-pulse me-1"></i> Health & Chemical Warnings</h6>
-            <div class="row g-2 mb-3 small">
-                <div class="col-6 p-2 bg-dark rounded"><strong>Allergens:</strong> <span id="allergensBox" class="text-light">--</span></div>
-                <div class="col-6 p-2 bg-dark rounded"><strong>Preservatives:</strong> <span id="preservativesBox" class="text-light">--</span></div>
-                <div class="col-6 p-2 bg-dark rounded"><strong>Sugar:</strong> <span id="sugarBox" class="text-light">--</span></div>
-                <div class="col-6 p-2 bg-dark rounded"><strong>Sodium:</strong> <span id="sodiumBox" class="text-light">--</span></div>
+            <!-- Health, Allergens & Toxic Additives -->
+            <h6 class="text-warning fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Health, Allergens & Chemical Additives</h6>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6"><div class="mini-card"><strong class="text-danger small"><i class="fa-solid fa-wheat-awn me-1"></i> Allergens:</strong><div id="allergensBox" class="text-light small mt-1">--</div></div></div>
+                <div class="col-md-6"><div class="mini-card"><strong class="text-warning small"><i class="fa-solid fa-flask me-1"></i> Preservatives / INS:</strong><div id="preservativesBox" class="text-light small mt-1">--</div></div></div>
+                <div class="col-md-6"><div class="mini-card"><strong class="text-danger small"><i class="fa-solid fa-skull-crossbones me-1"></i> Harmful Substances:</strong><div id="harmfulBox" class="text-light small mt-1">--</div></div></div>
+                <div class="col-md-3 col-6"><div class="mini-card"><strong class="text-info small">Sugar:</strong><div id="sugarBox" class="text-light small mt-1">--</div></div></div>
+                <div class="col-md-3 col-6"><div class="mini-card"><strong class="text-info small">Sodium:</strong><div id="sodiumBox" class="text-light small mt-1">--</div></div></div>
             </div>
 
-            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-list-check me-1"></i> Legal Metrology Declarations</h6>
+            <!-- Legal Metrology Declarations -->
+            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-scale-balanced me-1"></i> Mandatory Legal Metrology Declarations</h6>
             <div class="table-responsive mb-3">
                 <table class="table table-dark table-hover mb-0 small">
-                    <thead><tr class="text-secondary"><th>Rule</th><th>Status</th><th>Found</th><th>Guideline</th></tr></thead>
+                    <thead><tr class="text-secondary"><th>Rule</th><th>Status</th><th>Detected Info</th><th>Guideline</th></tr></thead>
                     <tbody id="auditTableBody"></tbody>
                 </table>
             </div>
 
-            <h6 class="text-secondary small fw-bold">Raw OCR Stream</h6>
+            <h6 class="text-secondary small fw-bold"><i class="fa-solid fa-terminal me-1"></i> Transcribed Label OCR</h6>
             <pre id="rawTextDisplay" class="mb-0"></pre>
         </div>
     </div>
@@ -118,21 +141,29 @@
 
             try {
                 const res = await fetch('/ocr', { method: 'POST', body: formData });
-                const data = JSON.parse(await res.text());
+                const rawResp = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(rawResp);
+                } catch(pe) {
+                    throw new Error("Server temporarily busy. Please tap Verify again.");
+                }
+
                 if (!data.success) throw new Error(data.message);
 
                 document.getElementById('verdictHeading').innerHTML = data.status === 'COMPLIANT' 
-                    ? `<span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> COMPLIANT</span>`
-                    : `<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> NON-COMPLIANT</span>`;
+                    ? `<span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> COMPLIANT PRODUCT</span>`
+                    : `<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> NON-COMPLIANCE DETECTED</span>`;
 
                 document.getElementById('scoreValue').innerText = `${data.detected_count}/${data.total_checks}`;
-                document.getElementById('rawTextDisplay').innerText = data.text;
+                document.getElementById('rawTextDisplay').innerText = data.text || "Extracted";
 
                 const hs = data.health_safety || {};
-                document.getElementById('allergensBox').innerText = (hs.allergens || []).join(', ') || 'None Flagged';
-                document.getElementById('preservativesBox').innerText = (hs.preservatives || []).join(', ') || 'None Detected';
+                document.getElementById('allergensBox').innerText = Array.isArray(hs.allergens) ? hs.allergens.join(', ') : (hs.allergens || 'None Flagged');
+                document.getElementById('preservativesBox').innerText = Array.isArray(hs.preservatives) ? hs.preservatives.join(', ') : (hs.preservatives || 'None Detected');
+                document.getElementById('harmfulBox').innerText = Array.isArray(hs.harmful_substances) ? hs.harmful_substances.join(', ') : (hs.harmful_substances || 'None Flagged');
                 document.getElementById('sugarBox').innerText = hs.sugar_level || 'MODERATE';
-                document.getElementById('sodiumBox').innerText = hs.sodium_level || 'MODERATE';
+                document.getElementById('sodiumBox').innerText = hs.sodium_level || 'LOW';
 
                 const tbody = document.getElementById('auditTableBody');
                 tbody.innerHTML = "";
@@ -140,7 +171,7 @@
                     const pass = String(item.status).toUpperCase() === 'PASS';
                     tbody.innerHTML += `
                         <tr>
-                            <td>${item.field}</td>
+                            <td class="fw-bold">${item.field}</td>
                             <td><span class="${pass ? 'pill-pass' : 'pill-fail'}">${pass ? 'PASS' : 'FAIL'}</span></td>
                             <td class="${pass ? 'text-light' : 'text-danger'}">${item.found_value || 'Not Detected'}</td>
                             <td class="text-secondary">${item.feedback || '-'}</td>

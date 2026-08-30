@@ -12,6 +12,14 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 RAW_KEY = os.environ.get("GEMINI_API_KEY", "")
 API_KEY = RAW_KEY.strip().strip('"').strip("'")
 
+@app.errorhandler(Exception)
+def handle_all_exceptions(e):
+    traceback.print_exc()
+    return jsonify({
+        "success": False,
+        "message": f"Server Notice: {str(e)}"
+    }), 200
+
 def clean_json_response(raw_resp):
     if not raw_resp:
         return {}
@@ -43,69 +51,41 @@ def health():
 def process_ocr():
     try:
         if not API_KEY:
-            return jsonify({"success": False, "message": "GEMINI_API_KEY environment variable missing on Render."}), 200
+            return jsonify({"success": False, "message": "GEMINI_API_KEY missing in Render environment."}), 200
 
         client = genai.Client(api_key=API_KEY)
 
         prompt_instruction = """
-        You are an expert FSSAI & Legal Metrology Auditor AI.
-        Analyze this packaging label image/text with extreme precision.
+        You are an elite FSSAI, Legal Metrology & Chemical Food Safety Auditor AI.
+        Analyze this packaging label with deep ingredient and legal inspection.
 
-        TASK 1: Extract ALL allergens mentioned (check 'Contains', 'May contain traces of', 'Warning', and ingredient list like Wheat, Oats, Sesame, Soy, Milk, Nuts, Peanuts).
-        TASK 2: Extract ALL preservatives, raising agents, and INS numbers (e.g. INS 500(ii), INS 503(ii), INS 322).
-        TASK 3: Extract exact Sugar and Sodium values per 100g/serving and classify level (HIGH/MODERATE/LOW).
-        TASK 4: Verify 6 Legal Metrology declarations with EXACT extracted text.
+        1. ALLERGENS: Identify ALL allergen items (e.g. Wheat, Gluten, Oats, Sesame, Soy, Milk/Dairy, Nuts, Peanuts, Eggs, Fish).
+        2. HARMFUL CHEMICALS & PRESERVATIVES: Extract all INS numbers, artificial colors (e.g. Tartrazine, Red 40), chemical preservatives (e.g. INS 211, BHA/BHT, INS 220), raising agents (INS 500, INS 503), emulsifiers (INS 322).
+        3. HARMFUL INGREDIENTS DETECTION: Flag high Palm oil, Trans fats, Invert sugar, High Fructose Corn Syrup, Excess MSG/E621.
+        4. NUTRITION: Classify Sugar and Sodium levels (HIGH / MODERATE / LOW).
+        5. LEGAL METROLOGY (6 Rules): Extract exact MRP (with tax mention), Net Quantity, Manufacturer details, Mfg/Expiry dates, Customer Care, and Country of Origin.
 
-        Return ONLY a raw JSON object with this exact schema:
+        Return ONLY a JSON object:
         {
-            "raw_text": "Complete transcribed label text...",
+            "raw_text": "Complete OCR transcribed label text...",
             "compliance_score": 100,
             "overall_status": "COMPLIANT",
-            "summary": "Clear summary of compliance and identified allergen risks",
+            "summary": "Compliance and chemical/health safety summary",
             "checks": [
-                {
-                    "field": "MRP Declaration",
-                    "status": "PASS",
-                    "found_value": "Exact MRP (e.g. ₹ 120.00 Incl. of all taxes)",
-                    "feedback": "Compliant with Legal Metrology rules."
-                },
-                {
-                    "field": "Net Quantity",
-                    "status": "PASS",
-                    "found_value": "Exact Net Wt (e.g. 240g)",
-                    "feedback": "Declared in standard metric unit."
-                },
-                {
-                    "field": "Manufacturer Details",
-                    "status": "PASS",
-                    "found_value": "Full name and address",
-                    "feedback": "Complete manufacturer details present."
-                },
-                {
-                    "field": "Manufacturing & Expiry",
-                    "status": "PASS",
-                    "found_value": "Mfg Date & Use By Date",
-                    "feedback": "Clear dates found."
-                },
-                {
-                    "field": "Consumer Care",
-                    "status": "PASS",
-                    "found_value": "Helpline, Email, Timings",
-                    "feedback": "Grievance redressal info verified."
-                },
-                {
-                    "field": "Country of Origin",
-                    "status": "PASS",
-                    "found_value": "Country name (e.g. India)",
-                    "feedback": "Country of origin explicitly declared."
-                }
+                {"field": "MRP Declaration", "status": "PASS", "found_value": "Exact MRP", "feedback": "Inclusive of all taxes verified."},
+                {"field": "Net Quantity", "status": "PASS", "found_value": "Exact Net Wt", "feedback": "Standard metric unit verified."},
+                {"field": "Manufacturer Details", "status": "PASS", "found_value": "Name & Address", "feedback": "Full details present."},
+                {"field": "Manufacturing & Expiry", "status": "PASS", "found_value": "Mfg & Expiry dates", "feedback": "Valid dates found."},
+                {"field": "Consumer Care", "status": "PASS", "found_value": "Helpline/Email", "feedback": "Customer contact details verified."},
+                {"field": "Country of Origin", "status": "PASS", "found_value": "Origin Country", "feedback": "Country of origin declared."}
             ],
             "health_safety": {
-                "allergens": ["List every detected allergen, e.g. Wheat, Oats, Sesame, Soy, Milk, Nuts, Peanut"],
-                "preservatives": ["List all INS codes, e.g. INS 500(ii), INS 503(ii), INS 322"],
+                "allergens": ["List of detected allergens"],
+                "preservatives": ["List of all INS codes, raising agents & additives found"],
+                "harmful_substances": ["List any flagged harmful additives, palm oil, artificial colors, or 'None Detected'"],
                 "sugar_level": "MODERATE",
                 "sodium_level": "LOW",
-                "health_warning": "Specific warning highlighting the detected allergens and ingredients."
+                "health_warning": "Clear summary of health, allergen, and chemical risks."
             }
         }
         """
@@ -113,7 +93,7 @@ def process_ocr():
         raw_input_text = request.form.get("text_input", "").strip()
 
         if raw_input_text:
-            contents_payload = [prompt_instruction, f"Analyze this label text:\n{raw_input_text}"]
+            contents_payload = [prompt_instruction, f"Audit text:\n{raw_input_text}"]
         else:
             file = request.files.get("image") or request.files.get("file")
             if not file or not file.filename:
@@ -138,38 +118,49 @@ def process_ocr():
             temperature=0.0
         )
 
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=contents_payload,
-            config=config
-        )
+        # Multi-model cascade: gemini-3.6-flash with seamless failovers
+        candidate_models = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
+        res_text = ""
+        last_error = ""
 
-        res_text = response.text.strip() if response and response.text else "{}"
-        data = clean_json_response(res_text)
+        for model_id in candidate_models:
+            try:
+                response = client.models.generate_content(
+                    model=model_id,
+                    contents=contents_payload,
+                    config=config
+                )
+                if response and response.text:
+                    res_text = response.text.strip()
+                    break
+            except Exception as e:
+                last_error = str(e)
+                continue
 
-        if not data or "checks" not in data:
+        if not res_text:
             return jsonify({
                 "success": False,
-                "message": "AI could not parse label details. Please retry with better lighting."
+                "message": f"AI Engine Notice: {last_error}"
             }), 200
 
+        data = clean_json_response(res_text)
         checks = data.get("checks", [])
         pass_count = sum(1 for c in checks if str(c.get("status", "")).upper() == "PASS")
 
         return jsonify({
             "success": True,
-            "text": data.get("raw_text", ""),
+            "text": data.get("raw_text", raw_input_text or "Label scanned successfully."),
             "checks": checks,
             "health_safety": data.get("health_safety", {}),
             "detected_count": pass_count,
-            "total_checks": len(checks) or 6,
+            "total_checks": len(checks) if checks else 6,
             "status": "COMPLIANT" if pass_count >= 5 else "POTENTIAL NON-COMPLIANCE",
             "summary": data.get("summary", "Audit completed.")
         }), 200
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"success": False, "message": f"Engine Notice: {str(e)}"}), 200
+        return jsonify({"success": False, "message": f"Engine Error: {str(e)}"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
