@@ -3,554 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelGuard AI — Ultra Pro Compliance & Food Safety Screener</title>
-    <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css)">
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)">
-    
+    <title>LabelGuard AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --bg-body: #050811;
-            --surface-1: #0d1322;
-            --surface-2: #141c30;
-            --border-glow: rgba(56, 189, 248, 0.25);
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            --accent-cyan: #06b6d4;
-            --accent-blue: #3b82f6;
-            --accent-emerald: #10b981;
-            --accent-rose: #f43f5e;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #050811 !important;
-            color: #f8fafc !important;
-            min-height: 100vh;
-        }
-
-        .navbar-custom {
-            background: #0d1322;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .brand-logo {
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .glass-card {
-            background: #0d1322;
-            border: 1px solid #1f293d;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-pill {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            color: #38bdf8;
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 6px 16px;
-            border-radius: 50px;
-            letter-spacing: 0.3px;
-        }
-
-        .nav-pills-custom {
-            background: #080d1a;
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid var(--border-subtle);
-            display: inline-flex;
-        }
-
-        .nav-pills-custom .nav-link {
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 10px 22px;
-            border-radius: 10px;
-            border: none;
-            background: transparent;
-        }
-
-        .nav-pills-custom .nav-link.active {
-            background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
-            color: #ffffff !important;
-        }
-
-        .upload-dropzone {
-            border: 2px dashed rgba(56, 189, 248, 0.3);
-            border-radius: 16px;
-            padding: 30px 20px;
-            text-align: center;
-            background: rgba(13, 19, 34, 0.4);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-dropzone:hover {
-            border-color: #06b6d4;
-            background: rgba(6, 182, 212, 0.05);
-        }
-
-        .scanner-active .laser-line {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #00f0ff, #38bdf8, transparent);
-            box-shadow: 0 0 15px #00f0ff, 0 0 30px #00f0ff;
-            animation: scanAnim 2s infinite alternate ease-in-out;
-            z-index: 10;
-        }
-
-        @keyframes scanAnim {
-            0% { top: 5%; }
-            100% { top: 90%; }
-        }
-
-        .custom-textarea {
-            background: #080d1a !important;
-            border: 1px solid #1f293d !important;
-            color: #f1f5f9 !important;
-            border-radius: 14px;
-            padding: 16px;
-            font-size: 0.9rem;
-        }
-
-        .custom-textarea:focus {
-            border-color: #06b6d4 !important;
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15) !important;
-        }
-
-        .btn-launch {
-            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
-            border: none;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.95rem;
-            padding: 14px 28px;
-            border-radius: 12px;
-        }
-
-        .stat-badge-box {
-            background: #141c30;
-            border: 1px solid var(--border-subtle);
-            border-radius: 14px;
-            padding: 16px 20px;
-        }
-
-        .health-mini-card {
-            background: #090e1c;
-            border: 1px solid #1f293d;
-            border-radius: 14px;
-            padding: 16px;
-            height: 100%;
-        }
-
-        .pill-pass {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 5px 12px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .pill-fail {
-            background: rgba(244, 63, 94, 0.15);
-            color: #fb7185;
-            border: 1px solid rgba(244, 63, 94, 0.3);
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 5px 12px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .terminal-box {
-            background: #030712;
-            border: 1px solid #1f293d;
-            border-radius: 12px;
-            padding: 16px;
-            color: #38bdf8;
-            font-family: monospace;
-            font-size: 0.85rem;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .animate-reveal {
-            animation: slideUpFade 0.5s ease-out forwards;
-        }
-
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { background: #050811; color: #f8fafc; font-family: system-ui, sans-serif; min-height: 100vh; }
+        .glass-card { background: #0d1322; border: 1px solid #1f293d; border-radius: 16px; }
+        .nav-link { color: #94a3b8; border-radius: 8px; font-weight: 600; }
+        .nav-link.active { background: linear-gradient(135deg, #2563eb, #06b6d4) !important; color: #fff !important; }
+        .upload-dropzone { border: 2px dashed #06b6d4; border-radius: 14px; padding: 25px; text-align: center; cursor: pointer; position: relative; }
+        .scanner-active .laser-line { display: block !important; position: absolute; left: 0; right: 0; height: 3px; background: #00f0ff; box-shadow: 0 0 15px #00f0ff; animation: scan 2s infinite alternate; }
+        @keyframes scan { 0% { top: 5%; } 100% { top: 90%; } }
+        .btn-launch { background: linear-gradient(135deg, #2563eb, #06b6d4); border: none; color: #fff; font-weight: 700; padding: 12px; border-radius: 10px; }
+        .pill-pass { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+        .pill-fail { background: rgba(244,63,94,0.2); color: #fb7185; border: 1px solid rgba(244,63,94,0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+        pre { background: #030712; color: #38bdf8; border: 1px solid #1f293d; border-radius: 10px; padding: 12px; font-size: 0.85rem; max-height: 200px; }
     </style>
 </head>
-<body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-custom py-3 mb-4 sticky-top">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="#">
-                <div style="background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);">
-                    <i class="fa-solid fa-shield-halved text-white fs-5"></i>
-                </div>
-                <span class="brand-logo fs-4">LabelGuard AI</span>
-            </a>
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1" onclick="runErrorDetector()" style="font-size: 0.75rem;">
-                    <i class="fa-solid fa-stethoscope me-1"></i> Check Engine Health
-                </button>
-                <span class="hero-pill d-none d-sm-inline-flex align-items-center gap-2">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
-                    Active
-                </span>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container pb-5" style="max-width: 950px;">
-        
-        <div class="text-center mb-4 pt-2">
-            <span class="hero-pill mb-3 d-inline-block">
-                <i class="fa-solid fa-bolt text-warning me-1"></i> Legal Metrology & Food Health AI
-            </span>
-            <h1 class="fw-bold display-6 mb-2" style="font-weight: 800; letter-spacing: -1px;">
-                Instant Regulatory & Health Audit
-            </h1>
-            <p class="text-secondary small mx-auto" style="max-width: 550px;">
-                Scan packaged goods for mandatory Legal Metrology rules, Allergens, Preservatives, and High Sugar/Sodium risks in seconds.
-            </p>
+<body class="p-3">
+    <div class="container" style="max-width: 850px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0 text-info"><i class="fa-solid fa-shield-halved me-2"></i>LabelGuard AI</h4>
+            <span class="badge bg-success">Online</span>
         </div>
 
         <div class="glass-card p-4 mb-4">
-            <div class="text-center mb-4">
-                <div class="nav-pills-custom" id="modeTab" role="tablist">
-                    <button class="nav-link active" id="image-tab" data-bs-toggle="pill" data-bs-target="#image-pane" type="button" role="tab">
-                        <i class="fa-solid fa-camera-retro me-2"></i> Scan / Photo
-                    </button>
-                    <button class="nav-link" id="text-tab" data-bs-toggle="pill" data-bs-target="#text-pane" type="button" role="tab">
-                        <i class="fa-solid fa-font me-2"></i> Paste Label Text
-                    </button>
-                </div>
-            </div>
+            <ul class="nav nav-pills justify-content-center mb-3">
+                <li class="nav-item"><button class="nav-link active" id="img-tab" data-bs-toggle="pill" data-bs-target="#img-pane">Scan / Photo</button></li>
+                <li class="nav-item"><button class="nav-link" id="txt-tab" data-bs-toggle="pill" data-bs-target="#txt-pane">Paste Text</button></li>
+            </ul>
 
-            <div class="tab-content" id="modeTabContent">
-                <div class="tab-pane fade show active" id="image-pane" role="tabpanel">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="img-pane">
                     <div class="upload-dropzone" id="dropArea" onclick="document.getElementById('labelInput').click()">
                         <div class="laser-line d-none" id="laserBeam"></div>
                         <input type="file" id="labelInput" accept="image/*" class="d-none" onchange="handleImage(this)">
-                        
-                        <div id="uploadPrompt">
-                            <div class="mb-3" style="font-size: 2.2rem; color: var(--accent-cyan);">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                            </div>
-                            <h5 class="fw-bold mb-1">Click to Upload or Snap Label</h5>
-                            <p class="text-secondary small mb-0">High-precision OCR processes JPG, PNG, WEBP (Up to 16MB)</p>
-                        </div>
-
-                        <div id="previewContainer" class="d-none position-relative">
-                            <img id="imagePreview" class="img-fluid rounded-3 shadow-lg" style="max-height: 240px; border: 1px solid var(--border-subtle);" />
-                            <div class="mt-2 text-info small fw-semibold">
-                                <i class="fa-solid fa-arrows-rotate me-1"></i> Tap to select different image
-                            </div>
-                        </div>
+                        <div id="uploadPrompt"><i class="fa-solid fa-cloud-arrow-up fs-2 text-info mb-2"></i><br>Upload Label Image / Photo</div>
+                        <div id="previewContainer" class="d-none"><img id="imagePreview" class="img-fluid rounded" style="max-height: 200px;" /></div>
                     </div>
                 </div>
-
-                <div class="tab-pane fade" id="text-pane" role="tabpanel">
-                    <textarea id="rawTextInput" class="form-control custom-textarea" rows="6" placeholder="Paste product label details here (e.g., MRP ₹99.00 incl. of all taxes, Net Wt: 400g, Mfg: 09/2024, Ingredients: Sugar, Refined Flour, Palm Oil, Preservative 211, INS 621, Contains Wheat, Soy)..."></textarea>
+                <div class="tab-pane fade" id="txt-pane">
+                    <textarea id="rawTextInput" class="form-control bg-dark text-light border-secondary" rows="5" placeholder="Paste label text here..."></textarea>
                 </div>
             </div>
 
-            <button id="scanBtn" class="btn btn-launch w-100 mt-4 d-flex align-items-center justify-content-center gap-2" onclick="startVerification()">
-                <i class="fa-solid fa-microchip"></i>
-                <span>Audit Product Compliance & Safety</span>
-            </button>
-
-            <div id="loader" class="text-center py-4 d-none">
-                <div class="spinner-border text-info mb-2" role="status" style="width: 2.2rem; height: 2.2rem;"></div>
-                <div class="text-info fw-semibold small">
-                    <i class="fa-solid fa-brain me-1"></i> Auditing Statutory Rules & Chemical Additives...
-                </div>
-            </div>
-
-            <div id="errorAlert" class="alert alert-danger mt-3 d-none small py-2 rounded-3"></div>
+            <button id="scanBtn" class="btn btn-launch w-100 mt-3" onclick="startAudit()"><i class="fa-solid fa-bolt me-1"></i> Audit Compliance & Health</button>
+            <div id="loader" class="text-center py-3 d-none text-info"><div class="spinner-border spinner-border-sm me-2"></div>Auditing parameters...</div>
+            <div id="errorAlert" class="alert alert-danger mt-3 d-none py-2 small"></div>
         </div>
 
-        <!-- Dashboard Results -->
         <div id="resultsCard" class="glass-card p-4 d-none">
-            <div class="row align-items-center g-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
-                <div class="col-md-7">
-                    <span class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Audited Verdict</span>
-                    <h3 id="verdictHeading" class="fw-bold mb-1" style="font-weight: 800;">--</h3>
-                    <p id="summaryText" class="text-secondary small mb-0">--</p>
-                </div>
-                <div class="col-md-5 d-flex gap-2 justify-content-md-end">
-                    <div class="stat-badge-box text-center flex-fill">
-                        <div class="fs-4 fw-bold text-info" id="scoreValue">6/6</div>
-                        <div class="text-secondary" style="font-size: 0.72rem; font-weight: 600;">Legal Rules Verified</div>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+                <div><span class="text-secondary small">VERDICT</span><h4 id="verdictHeading" class="m-0 fw-bold">--</h4></div>
+                <div class="text-end"><span class="fs-4 fw-bold text-info" id="scoreValue">6/6</span><br><span class="text-secondary small">Rules Verified</span></div>
             </div>
 
-            <!-- Health Risk Matrix -->
-            <div class="mb-4">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="fa-solid fa-heart-pulse text-danger"></i>
-                    <h6 class="fw-bold mb-0 text-light">Health, Allergen & Chemical Risk Analysis</h6>
-                </div>
-
-                <div class="row g-3">
-                    <div class="col-md-6 col-lg-3">
-                        <div class="health-mini-card">
-                            <span class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-wheat-awn-circle-exclamation text-warning me-1"></i> Allergens
-                            </span>
-                            <div id="allergensBox" class="mt-2 fw-bold text-light small">--</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-lg-3">
-                        <div class="health-mini-card">
-                            <span class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-flask-vial text-info me-1"></i> Preservatives / INS
-                            </span>
-                            <div id="preservativesBox" class="mt-2 fw-bold text-light small">--</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-lg-3">
-                        <div class="health-mini-card">
-                            <span class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-cubes-stacked text-primary me-1"></i> Sugar Content
-                            </span>
-                            <div id="sugarBadgeContainer" class="mt-2">--</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-lg-3">
-                        <div class="health-mini-card">
-                            <span class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-bowl-food text-warning me-1"></i> Sodium Level
-                            </span>
-                            <div id="sodiumBadgeContainer" class="mt-2">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="healthSummaryAlert" class="alert mt-3 mb-0 small" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); color: #cbd5e1;"></div>
+            <h6 class="text-warning fw-bold mb-2"><i class="fa-solid fa-heart-pulse me-1"></i> Health & Chemical Warnings</h6>
+            <div class="row g-2 mb-3 small">
+                <div class="col-6 p-2 bg-dark rounded"><strong>Allergens:</strong> <span id="allergensBox" class="text-light">--</span></div>
+                <div class="col-6 p-2 bg-dark rounded"><strong>Preservatives:</strong> <span id="preservativesBox" class="text-light">--</span></div>
+                <div class="col-6 p-2 bg-dark rounded"><strong>Sugar:</strong> <span id="sugarBox" class="text-light">--</span></div>
+                <div class="col-6 p-2 bg-dark rounded"><strong>Sodium:</strong> <span id="sodiumBox" class="text-light">--</span></div>
             </div>
 
-            <!-- Declarations Table -->
-            <div class="mb-4">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="fa-solid fa-scale-balanced text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-light">Statutory Metrology Declarations</h6>
-                </div>
-                
-                <div class="table-responsive rounded-3" style="border: 1px solid var(--border-subtle);">
-                    <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
-                        <thead>
-                            <tr class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; background: #080d1a;">
-                                <th class="py-3 px-3">Mandatory Checklist</th>
-                                <th class="py-3">Status</th>
-                                <th class="py-3">Extracted Data</th>
-                                <th class="py-3 px-3">Statutory Guideline</th>
-                            </tr>
-                        </thead>
-                        <tbody id="auditTableBody" style="font-size: 0.85rem;"></tbody>
-                    </table>
-                </div>
+            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-list-check me-1"></i> Legal Metrology Declarations</h6>
+            <div class="table-responsive mb-3">
+                <table class="table table-dark table-hover mb-0 small">
+                    <thead><tr class="text-secondary"><th>Rule</th><th>Status</th><th>Found</th><th>Guideline</th></tr></thead>
+                    <tbody id="auditTableBody"></tbody>
+                </table>
             </div>
 
-            <!-- OCR Terminal -->
-            <div>
-                <span class="text-secondary small fw-bold mb-2 d-inline-block">
-                    <i class="fa-solid fa-terminal me-1 text-info"></i> Raw Extracted OCR Stream
-                </span>
-                <div id="rawTextDisplay" class="terminal-box"></div>
-            </div>
+            <h6 class="text-secondary small fw-bold">Raw OCR Stream</h6>
+            <pre id="rawTextDisplay" class="mb-0"></pre>
         </div>
-
     </div>
 
-    <script src="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js)"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentMode = 'image';
-
-        document.getElementById('image-tab').addEventListener('shown.bs.tab', () => currentMode = 'image');
-        document.getElementById('text-tab').addEventListener('shown.bs.tab', () => currentMode = 'text');
+        let mode = 'img';
+        document.getElementById('img-tab').onclick = () => mode = 'img';
+        document.getElementById('txt-tab').onclick = () => mode = 'txt';
 
         function handleImage(input) {
             if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
+                const r = new FileReader();
+                r.onload = e => {
                     document.getElementById('imagePreview').src = e.target.result;
                     document.getElementById('previewContainer').classList.remove('d-none');
                     document.getElementById('uploadPrompt').classList.add('d-none');
-                }
-                reader.readAsDataURL(input.files[0]);
+                };
+                r.readAsDataURL(input.files[0]);
             }
         }
 
-        function formatLevelBadge(level) {
-            const lvl = String(level || '').toUpperCase();
-            if (lvl === 'HIGH') {
-                return '<span class="badge" style="background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244,63,94,0.4);"><i class="fa-solid fa-triangle-exclamation me-1"></i> HIGH RISK</span>';
-            }
-            if (lvl === 'MODERATE') {
-                return '<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4);"><i class="fa-solid fa-circle-exclamation me-1"></i> MODERATE</span>';
-            }
-            if (lvl === 'LOW') {
-                return '<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4);"><i class="fa-solid fa-check me-1"></i> OPTIMAL / LOW</span>';
-            }
-            return '<span class="badge bg-secondary text-light">NOT STATED</span>';
-        }
-
-        async function runErrorDetector() {
-            try {
-                const res = await fetch('/api/health-check');
-                const diag = await res.json();
-                if (diag.gemini_api_key_configured) {
-                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Models: Auto-Cascade Enabled\n• Engine is 100% Ready!`);
-                } else {
-                    alert(`⚠️ KEY NOT FOUND\nGEMINI_API_KEY Render par missing hai. Please Render settings mein jaakar key save karein.`);
-                }
-            } catch (err) {
-                alert(`❌ Server Connection Notice: ${err.message}`);
-            }
-        }
-
-        async function startVerification() {
-            const fileInput = document.getElementById('labelInput');
-            const textInput = document.getElementById('rawTextInput');
-            const errorAlert = document.getElementById('errorAlert');
-            const loader = document.getElementById('loader');
-            const scanBtn = document.getElementById('scanBtn');
-            const resultsCard = document.getElementById('resultsCard');
-            const dropArea = document.getElementById('dropArea');
-            const laserBeam = document.getElementById('laserBeam');
-
+        async function startAudit() {
             const formData = new FormData();
-
-            if (currentMode === 'image') {
-                if (!fileInput.files[0]) {
-                    alert("Please select or snap a packaging label photo first!");
-                    return;
-                }
-                formData.append('image', fileInput.files[0]);
-                dropArea.classList.add('scanner-active');
-                laserBeam.classList.remove('d-none');
+            if (mode === 'img') {
+                const f = document.getElementById('labelInput').files[0];
+                if (!f) return alert("Select image first!");
+                formData.append('image', f);
+                document.getElementById('dropArea').classList.add('scanner-active');
+                document.getElementById('laserBeam').classList.remove('d-none');
             } else {
-                if (!textInput.value.trim()) {
-                    alert("Please type or paste some label text first!");
-                    return;
-                }
-                formData.append('text_input', textInput.value.trim());
+                const t = document.getElementById('rawTextInput').value.trim();
+                if (!t) return alert("Enter label text first!");
+                formData.append('text_input', t);
             }
 
-            errorAlert.classList.add('d-none');
-            resultsCard.classList.add('d-none');
-            resultsCard.classList.remove('animate-reveal');
-            loader.classList.remove('d-none');
-            scanBtn.disabled = true;
+            document.getElementById('errorAlert').classList.add('d-none');
+            document.getElementById('resultsCard').classList.add('d-none');
+            document.getElementById('loader').classList.remove('d-none');
+            document.getElementById('scanBtn').disabled = true;
 
             try {
                 const res = await fetch('/ocr', { method: 'POST', body: formData });
-                
-                // Safe text response reading so JSON parser never throws <html> token error
-                const rawText = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch(e) {
-                    throw new Error("Temporary server connection delay. Please tap Verify again.");
-                }
+                const data = JSON.parse(await res.text());
+                if (!data.success) throw new Error(data.message);
 
-                if (!data.success) {
-                    throw new Error(data.message || "Audit failed to process.");
-                }
+                document.getElementById('verdictHeading').innerHTML = data.status === 'COMPLIANT' 
+                    ? `<span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> COMPLIANT</span>`
+                    : `<span class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> NON-COMPLIANT</span>`;
 
-                const isCompliant = data.status === 'COMPLIANT';
-                document.getElementById('verdictHeading').innerHTML = isCompliant 
-                    ? `<span style="color: #34d399;"><i class="fa-solid fa-circle-check me-2"></i>COMPLIANT PRODUCT</span>`
-                    : `<span style="color: #fb7185;"><i class="fa-solid fa-triangle-exclamation me-2"></i>POTENTIAL NON-COMPLIANCE</span>`;
-
-                document.getElementById('summaryText').innerText = data.summary || "Automated audit completed.";
                 document.getElementById('scoreValue').innerText = `${data.detected_count}/${data.total_checks}`;
-                document.getElementById('rawTextDisplay').innerText = data.text || "No text extracted.";
+                document.getElementById('rawTextDisplay').innerText = data.text;
 
                 const hs = data.health_safety || {};
-                const allergensList = (hs.allergens && hs.allergens.length) ? hs.allergens.join(', ') : 'None Flagged';
-                const preservativesList = (hs.preservatives && hs.preservatives.length) ? hs.preservatives.join(', ') : 'None Detected';
-
-                document.getElementById('allergensBox').innerText = allergensList;
-                document.getElementById('preservativesBox').innerText = preservativesList;
-                document.getElementById('sugarBadgeContainer').innerHTML = formatLevelBadge(hs.sugar_level);
-                document.getElementById('sodiumBadgeContainer').innerHTML = formatLevelBadge(hs.sodium_level);
-                
-                document.getElementById('healthSummaryAlert').innerHTML = `
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-circle-info text-info fs-5"></i>
-                        <span><strong>Health Advisory:</strong> ${hs.health_warning || 'Ingredients and nutritional markers are within standard range.'}</span>
-                    </div>
-                `;
+                document.getElementById('allergensBox').innerText = (hs.allergens || []).join(', ') || 'None Flagged';
+                document.getElementById('preservativesBox').innerText = (hs.preservatives || []).join(', ') || 'None Detected';
+                document.getElementById('sugarBox').innerText = hs.sugar_level || 'MODERATE';
+                document.getElementById('sodiumBox').innerText = hs.sodium_level || 'MODERATE';
 
                 const tbody = document.getElementById('auditTableBody');
                 tbody.innerHTML = "";
-                
-                if (data.checks && data.checks.length > 0) {
-                    data.checks.forEach(item => {
-                        const isPass = String(item.status).toUpperCase() === 'PASS';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="fw-bold text-light px-3">${item.field}</td>
-                                <td>
-                                    <span class="${isPass ? 'pill-pass' : 'pill-fail'}">
-                                        <i class="fa-solid ${isPass ? 'fa-check' : 'fa-xmark'} me-1"></i> ${isPass ? 'PASS' : 'FAIL'}
-                                    </span>
-                                </td>
-                                <td class="fw-semibold ${isPass ? 'text-light' : 'text-danger'}">${item.found_value || 'Not Detected'}</td>
-                                <td class="text-secondary px-3" style="font-size: 0.8rem;">${item.feedback || '-'}</td>
-                            </tr>
-                        `;
-                    });
-                }
+                (data.checks || []).forEach(item => {
+                    const pass = String(item.status).toUpperCase() === 'PASS';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.field}</td>
+                            <td><span class="${pass ? 'pill-pass' : 'pill-fail'}">${pass ? 'PASS' : 'FAIL'}</span></td>
+                            <td class="${pass ? 'text-light' : 'text-danger'}">${item.found_value || 'Not Detected'}</td>
+                            <td class="text-secondary">${item.feedback || '-'}</td>
+                        </tr>
+                    `;
+                });
 
-                resultsCard.classList.remove('d-none');
-                resultsCard.classList.add('animate-reveal');
-                resultsCard.scrollIntoView({ behavior: 'smooth' });
-
+                document.getElementById('resultsCard').classList.remove('d-none');
             } catch (err) {
-                errorAlert.innerText = err.message;
-                errorAlert.classList.remove('d-none');
+                document.getElementById('errorAlert').innerText = err.message;
+                document.getElementById('errorAlert').classList.remove('d-none');
             } finally {
-                loader.classList.add('d-none');
-                scanBtn.disabled = false;
-                dropArea.classList.remove('scanner-active');
-                laserBeam.classList.add('d-none');
+                document.getElementById('loader').classList.add('d-none');
+                document.getElementById('scanBtn').disabled = false;
+                document.getElementById('dropArea').classList.remove('scanner-active');
+                document.getElementById('laserBeam').classList.add('d-none');
             }
         }
     </script>
