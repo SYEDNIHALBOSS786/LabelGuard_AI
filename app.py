@@ -51,26 +51,26 @@ def health():
 def process_ocr():
     try:
         if not API_KEY:
-            return jsonify({"success": False, "message": "GEMINI_API_KEY missing in Render environment."}), 200
+            return jsonify({"success": False, "message": "GEMINI_API_KEY is not configured on Render."}), 200
 
         client = genai.Client(api_key=API_KEY)
 
         prompt_instruction = """
-        You are an elite FSSAI, Legal Metrology & Chemical Food Safety Auditor AI.
-        Analyze this packaging label with deep ingredient and legal inspection.
+        You are an elite FSSAI & Legal Metrology Auditor AI.
+        Analyze this packaging label image/text with extreme precision.
 
-        1. ALLERGENS: Identify ALL allergen items (e.g. Wheat, Gluten, Oats, Sesame, Soy, Milk/Dairy, Nuts, Peanuts, Eggs, Fish).
-        2. HARMFUL CHEMICALS & PRESERVATIVES: Extract all INS numbers, artificial colors (e.g. Tartrazine, Red 40), chemical preservatives (e.g. INS 211, BHA/BHT, INS 220), raising agents (INS 500, INS 503), emulsifiers (INS 322).
-        3. HARMFUL INGREDIENTS DETECTION: Flag high Palm oil, Trans fats, Invert sugar, High Fructose Corn Syrup, Excess MSG/E621.
+        1. ALLERGENS: Identify ALL allergen items (look in 'Contains', 'May contain', warnings, and ingredients: Wheat, Gluten, Oats, Sesame, Soy, Milk, Nuts, Peanuts, etc.).
+        2. PRESERVATIVES & ADDITIVES: Extract all INS numbers, raising agents (INS 500ii, INS 503ii), emulsifiers (INS 322), artificial colors or preservatives.
+        3. HARMFUL SUBSTANCES: Flag Palm oil, Invert syrup, Trans fats, excess MSG, artificial flavors, or state 'None Flagged'.
         4. NUTRITION: Classify Sugar and Sodium levels (HIGH / MODERATE / LOW).
-        5. LEGAL METROLOGY (6 Rules): Extract exact MRP (with tax mention), Net Quantity, Manufacturer details, Mfg/Expiry dates, Customer Care, and Country of Origin.
+        5. LEGAL METROLOGY (6 Rules): Extract exact MRP, Net Quantity, Manufacturer details, Mfg/Expiry dates, Customer Care, and Country of Origin.
 
-        Return ONLY a JSON object:
+        Return ONLY a JSON object matching this schema:
         {
             "raw_text": "Complete OCR transcribed label text...",
             "compliance_score": 100,
             "overall_status": "COMPLIANT",
-            "summary": "Compliance and chemical/health safety summary",
+            "summary": "Clear summary of compliance, allergens, and additives",
             "checks": [
                 {"field": "MRP Declaration", "status": "PASS", "found_value": "Exact MRP", "feedback": "Inclusive of all taxes verified."},
                 {"field": "Net Quantity", "status": "PASS", "found_value": "Exact Net Wt", "feedback": "Standard metric unit verified."},
@@ -80,12 +80,12 @@ def process_ocr():
                 {"field": "Country of Origin", "status": "PASS", "found_value": "Origin Country", "feedback": "Country of origin declared."}
             ],
             "health_safety": {
-                "allergens": ["List of detected allergens"],
-                "preservatives": ["List of all INS codes, raising agents & additives found"],
-                "harmful_substances": ["List any flagged harmful additives, palm oil, artificial colors, or 'None Detected'"],
+                "allergens": ["List all detected allergens"],
+                "preservatives": ["List all INS numbers & additives"],
+                "harmful_substances": ["Palm Oil", "Invert Syrup"],
                 "sugar_level": "MODERATE",
                 "sodium_level": "LOW",
-                "health_warning": "Clear summary of health, allergen, and chemical risks."
+                "health_warning": "Contains multiple allergens (Wheat, Oats, Sesame, Soy, Nuts, Peanut)."
             }
         }
         """
@@ -113,37 +113,20 @@ def process_ocr():
                 prompt_instruction
             ]
 
+        # Use gemini-3.6-flash cleanly
         config = types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.0
+            response_mime_type="application/json"
         )
 
-        # Multi-model cascade: gemini-3.6-flash with seamless failovers
-        candidate_models = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash"]
-        res_text = ""
-        last_error = ""
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=contents_payload,
+            config=config
+        )
 
-        for model_id in candidate_models:
-            try:
-                response = client.models.generate_content(
-                    model=model_id,
-                    contents=contents_payload,
-                    config=config
-                )
-                if response and response.text:
-                    res_text = response.text.strip()
-                    break
-            except Exception as e:
-                last_error = str(e)
-                continue
-
-        if not res_text:
-            return jsonify({
-                "success": False,
-                "message": f"AI Engine Notice: {last_error}"
-            }), 200
-
+        res_text = response.text.strip() if response and response.text else "{}"
         data = clean_json_response(res_text)
+
         checks = data.get("checks", [])
         pass_count = sum(1 for c in checks if str(c.get("status", "")).upper() == "PASS")
 
@@ -160,7 +143,7 @@ def process_ocr():
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"success": False, "message": f"Engine Error: {str(e)}"}), 200
+        return jsonify({"success": False, "message": f"AI Engine Notice: {str(e)}"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
