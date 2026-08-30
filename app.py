@@ -21,7 +21,7 @@ def process_ocr():
         if not API_KEY:
             return jsonify({
                 "success": False,
-                "message": "GEMINI_API_KEY is missing on Render Environment Variables."
+                "message": "GEMINI_API_KEY environment variable missing on Render."
             }), 500
 
         file = None
@@ -33,7 +33,7 @@ def process_ocr():
         if not file or file.filename == "":
             return jsonify({
                 "success": False,
-                "message": "No valid image file received."
+                "message": "No image file provided."
             }), 400
 
         file.seek(0)
@@ -42,29 +42,58 @@ def process_ocr():
         if mime_type not in ["image/jpeg", "image/png", "image/webp"]:
             mime_type = "image/jpeg"
 
-        # Initialize official GenAI client
         client = genai.Client(api_key=API_KEY)
 
         prompt = """
         You are an expert Legal Metrology & FSSAI Packaging Compliance Auditor.
-        Read this product packaging label image and extract all text.
+        Read this product packaging label image and extract all text and audit mandatory fields.
 
-        Return ONLY a JSON object (no markdown formatting, no backticks):
+        Return ONLY a JSON object (no markdown fences, no backticks) with this exact schema:
         {
-            "raw_text": "All transcribed text here...",
-            "mrp": "Extracted MRP with tax details or Not Found",
-            "net_quantity": "Extracted Net Qty or Not Found",
-            "mfg_details": "Manufacturer details or Not Found",
-            "dates": "Mfg/Expiry date or Not Found",
-            "consumer_care": "Customer care details or Not Found",
-            "origin": "Country of origin or Not Found",
-            "detected_count": 0,
-            "total_checks": 6,
-            "status": "COMPLIANT or POTENTIAL NON-COMPLIANCE"
+            "raw_text": "All transcribed label text...",
+            "checks": [
+                {
+                    "field": "MRP Declaration",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted MRP string or Not Detected",
+                    "feedback": "Must state 'inclusive of all taxes'"
+                },
+                {
+                    "field": "Net Quantity",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted Net Qty or Not Detected",
+                    "feedback": "Must use standard metric units (g, kg, ml, l)"
+                },
+                {
+                    "field": "Manufacturer / Packer Details",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted Name & Address or Not Detected",
+                    "feedback": "Full manufacturer/packer identity and address"
+                },
+                {
+                    "field": "Manufacturing / Expiry Date",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted Dates or Not Detected",
+                    "feedback": "Date of manufacturing or Best Before date"
+                },
+                {
+                    "field": "Consumer Care Details",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted Customer care or Not Detected",
+                    "feedback": "Customer care number/email mandatory"
+                },
+                {
+                    "field": "Country of Origin",
+                    "status": "PASS or FAIL",
+                    "found_value": "Extracted Country or Not Detected",
+                    "feedback": "Country of origin declaration"
+                }
+            ],
+            "overall_status": "COMPLIANT or NON_COMPLIANCE",
+            "summary": "Brief verdict"
         }
         """
 
-        # Call Gemini 2.5 Flash
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=[
@@ -75,7 +104,6 @@ def process_ocr():
 
         res_text = response.text.strip() if response.text else ""
 
-        # Strip accidental code blocks
         if "```" in res_text:
             res_text = res_text.replace("```json", "").replace("```", "").strip()
 
@@ -84,35 +112,23 @@ def process_ocr():
         except Exception:
             data = {
                 "raw_text": res_text,
-                "mrp": "Found",
-                "net_quantity": "Found",
-                "mfg_details": "Found",
-                "dates": "Found",
-                "consumer_care": "Found",
-                "origin": "Found",
-                "detected_count": 5,
-                "total_checks": 6,
-                "status": "COMPLIANT"
+                "checks": [],
+                "overall_status": "COMPLIANT"
             }
 
-        checks = [
-            data.get("mrp"), data.get("net_quantity"),
-            data.get("mfg_details"), data.get("dates"),
-            data.get("consumer_care"), data.get("origin")
-        ]
-        pass_count = sum(1 for c in checks if c and "Not Found" not in str(c))
-        data["detected_count"] = pass_count
-        data["total_checks"] = 6
-        data["status"] = "COMPLIANT" if pass_count >= 5 else "POTENTIAL NON-COMPLIANCE"
+        # Calculate pass score
+        checks = data.get("checks", [])
+        pass_count = sum(1 for c in checks if c.get("status") == "PASS")
+        total_checks = len(checks) if checks else 6
 
         return jsonify({
             "success": True,
             "text": data.get("raw_text", ""),
-            "raw_text": data.get("raw_text", ""),
-            "detected_count": data["detected_count"],
-            "total_checks": data["total_checks"],
-            "status": data["status"],
-            "details": data
+            "checks": checks,
+            "detected_count": pass_count,
+            "total_checks": total_checks,
+            "status": "COMPLIANT" if pass_count >= 5 else "POTENTIAL NON-COMPLIANCE",
+            "summary": data.get("summary", "")
         }), 200
 
     except Exception as e:
