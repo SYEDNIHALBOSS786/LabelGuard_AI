@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LabelGuard AI — Ultra Pro Compliance & Food Safety Screener</title>
-    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-    <link href="[https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
     <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css)">
     <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)">
     
@@ -27,23 +24,17 @@
 
         * {
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-body);
-            color: var(--text-primary);
+            background-color: #050811 !important;
+            color: #f8fafc !important;
             min-height: 100vh;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
-            background-attachment: fixed;
         }
 
         .navbar-custom {
-            background: rgba(13, 19, 34, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: #0d1322;
             border-bottom: 1px solid var(--border-subtle);
         }
 
@@ -56,8 +47,8 @@
         }
 
         .glass-card {
-            background: var(--surface-1);
-            border: 1px solid var(--border-subtle);
+            background: #0d1322;
+            border: 1px solid #1f293d;
             border-radius: 20px;
             box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
             position: relative;
@@ -84,21 +75,20 @@
         }
 
         .nav-pills-custom .nav-link {
-            color: var(--text-secondary);
+            color: #94a3b8;
             font-weight: 600;
             font-size: 0.85rem;
             padding: 10px 22px;
             border-radius: 10px;
-            transition: all 0.25s ease;
+            border: none;
+            background: transparent;
         }
 
         .nav-pills-custom .nav-link.active {
-            background: linear-gradient(135deg, #2563eb, #06b6d4);
-            color: #ffffff;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, #2563eb, #06b6d4) !important;
+            color: #ffffff !important;
         }
 
-        /* AI Laser Scanning Beam */
         .upload-dropzone {
             border: 2px dashed rgba(56, 189, 248, 0.3);
             border-radius: 16px;
@@ -106,15 +96,13 @@
             text-align: center;
             background: rgba(13, 19, 34, 0.4);
             cursor: pointer;
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
         .upload-dropzone:hover {
-            border-color: var(--accent-cyan);
+            border-color: #06b6d4;
             background: rgba(6, 182, 212, 0.05);
-            transform: translateY(-2px);
         }
 
         .scanner-active .laser-line {
@@ -135,19 +123,17 @@
         }
 
         .custom-textarea {
-            background: #080d1a;
-            border: 1px solid var(--border-subtle);
-            color: #f1f5f9;
+            background: #080d1a !important;
+            border: 1px solid #1f293d !important;
+            color: #f1f5f9 !important;
             border-radius: 14px;
             padding: 16px;
             font-size: 0.9rem;
         }
 
         .custom-textarea:focus {
-            background: #080d1a;
-            border-color: var(--accent-cyan);
-            color: #fff;
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+            border-color: #06b6d4 !important;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15) !important;
         }
 
         .btn-launch {
@@ -158,18 +144,10 @@
             font-size: 0.95rem;
             padding: 14px 28px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
-            transition: all 0.25s ease;
-        }
-
-        .btn-launch:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 30px -5px rgba(6, 182, 212, 0.6);
-            color: #fff;
         }
 
         .stat-badge-box {
-            background: var(--surface-2);
+            background: #141c30;
             border: 1px solid var(--border-subtle);
             border-radius: 14px;
             padding: 16px 20px;
@@ -177,16 +155,10 @@
 
         .health-mini-card {
             background: #090e1c;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid #1f293d;
             border-radius: 14px;
             padding: 16px;
             height: 100%;
-            transition: transform 0.2s ease;
-        }
-
-        .health-mini-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--border-glow);
         }
 
         .pill-pass {
@@ -215,7 +187,7 @@
 
         .terminal-box {
             background: #030712;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid #1f293d;
             border-radius: 12px;
             padding: 16px;
             color: #38bdf8;
@@ -226,17 +198,18 @@
         }
 
         .animate-reveal {
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideUpFade 0.5s ease-out forwards;
         }
 
         @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(25px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
+    <!-- Navbar -->
     <nav class="navbar navbar-custom py-3 mb-4 sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand d-flex align-items-center gap-2 m-0" href="#">
@@ -250,7 +223,7 @@
                     <i class="fa-solid fa-stethoscope me-1"></i> Check Engine Health
                 </button>
                 <span class="hero-pill d-none d-sm-inline-flex align-items-center gap-2">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
                     Active
                 </span>
             </div>
@@ -263,7 +236,7 @@
             <span class="hero-pill mb-3 d-inline-block">
                 <i class="fa-solid fa-bolt text-warning me-1"></i> Legal Metrology & Food Health AI
             </span>
-            <h1 class="fw-extrabold display-6 mb-2" style="font-weight: 800; letter-spacing: -1px;">
+            <h1 class="fw-bold display-6 mb-2" style="font-weight: 800; letter-spacing: -1px;">
                 Instant Regulatory & Health Audit
             </h1>
             <p class="text-secondary small mx-auto" style="max-width: 550px;">
@@ -326,21 +299,23 @@
             <div id="errorAlert" class="alert alert-danger mt-3 d-none small py-2 rounded-3"></div>
         </div>
 
+        <!-- Dashboard Results -->
         <div id="resultsCard" class="glass-card p-4 d-none">
             <div class="row align-items-center g-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
                 <div class="col-md-7">
                     <span class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Audited Verdict</span>
-                    <h3 id="verdictHeading" class="fw-extrabold mb-1" style="font-weight: 800;">--</h3>
+                    <h3 id="verdictHeading" class="fw-bold mb-1" style="font-weight: 800;">--</h3>
                     <p id="summaryText" class="text-secondary small mb-0">--</p>
                 </div>
                 <div class="col-md-5 d-flex gap-2 justify-content-md-end">
                     <div class="stat-badge-box text-center flex-fill">
-                        <div class="fs-4 fw-extrabold text-info" id="scoreValue">6/6</div>
+                        <div class="fs-4 fw-bold text-info" id="scoreValue">6/6</div>
                         <div class="text-secondary" style="font-size: 0.72rem; font-weight: 600;">Legal Rules Verified</div>
                     </div>
                 </div>
             </div>
 
+            <!-- Health Risk Matrix -->
             <div class="mb-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <i class="fa-solid fa-heart-pulse text-danger"></i>
@@ -388,6 +363,7 @@
                 <div id="healthSummaryAlert" class="alert mt-3 mb-0 small" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); color: #cbd5e1;"></div>
             </div>
 
+            <!-- Declarations Table -->
             <div class="mb-4">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <i class="fa-solid fa-scale-balanced text-primary"></i>
@@ -409,6 +385,7 @@
                 </div>
             </div>
 
+            <!-- OCR Terminal -->
             <div>
                 <span class="text-secondary small fw-bold mb-2 d-inline-block">
                     <i class="fa-solid fa-terminal me-1 text-info"></i> Raw Extracted OCR Stream
@@ -452,13 +429,12 @@
             return '<span class="badge bg-secondary text-light">NOT STATED</span>';
         }
 
-        // Live Health & Error Detector
         async function runErrorDetector() {
             try {
                 const res = await fetch('/api/health-check');
                 const diag = await res.json();
                 if (diag.gemini_api_key_configured) {
-                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Engine is 100% Ready!`);
+                    alert(`✅ SYSTEM DIAGNOSTIC PASS\n• Server: ${diag.server_status}\n• Key Verified: ${diag.key_preview}\n• Max Upload: ${diag.max_upload_size}\n• Active Model: ${diag.model}\n• Engine is 100% Ready!`);
                 } else {
                     alert(`⚠️ KEY NOT FOUND\nGEMINI_API_KEY Render par missing hai. Please Render settings mein jaakar key save karein.`);
                 }

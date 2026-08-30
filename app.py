@@ -7,12 +7,11 @@ from google import genai
 from google.genai import types
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB image allowed
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 RAW_KEY = os.environ.get("GEMINI_API_KEY", "")
 API_KEY = RAW_KEY.strip().strip('"').strip("'")
 
-# Predefined Fallback Template in case AI fails or returns empty
 FALLBACK_AUDIT_DATA = {
     "raw_text": "Audit processed successfully.",
     "compliance_score": 80,
@@ -37,23 +36,19 @@ FALLBACK_AUDIT_DATA = {
 }
 
 def extract_clean_json(text_content):
-    """Robust JSON extractor that handles markdown blocks, trailing commas, and raw outputs"""
     if not text_content:
         return FALLBACK_AUDIT_DATA
     
     clean = text_content.strip()
-    # Strip markdown backticks
     if "```" in clean:
         clean = re.sub(r"^```[a-zA-Z]*\n?", "", clean)
         clean = re.sub(r"```$", "", clean).strip()
 
-    # Try standard load
     try:
         return json.loads(clean)
     except Exception:
         pass
 
-    # Try finding JSON object bounds { ... }
     try:
         match = re.search(r'(\{[\s\S]*\})', clean)
         if match:
@@ -69,7 +64,6 @@ def extract_clean_json(text_content):
 def index():
     return render_template("index.html")
 
-# System Diagnostic & Error Detector Route
 @app.route("/api/health-check", methods=["GET"])
 def health_check():
     key_exists = bool(API_KEY and len(API_KEY) > 10)
@@ -80,7 +74,7 @@ def health_check():
         "gemini_api_key_configured": key_exists,
         "key_preview": key_masked,
         "max_upload_size": "16MB",
-        "models": "gemini-2.5-flash / auto-failover"
+        "model": "gemini-3.6-flash"
     }
     return jsonify(status), 200
 
@@ -91,7 +85,7 @@ def process_ocr():
         if not API_KEY:
             return jsonify({
                 "success": False,
-                "message": "GEMINI_API_KEY is not configured in Render Environment Variables. Please add your key."
+                "message": "GEMINI_API_KEY is not configured in Render Environment Variables."
             }), 500
 
         client = genai.Client(api_key=API_KEY)
@@ -194,14 +188,14 @@ def process_ocr():
                 prompt_instruction
             ]
 
-        # Call Gemini 2.5
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
             temperature=0.1
         )
 
+        # Active Model: gemini-3.6-flash
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=contents_payload,
             config=config
         )
