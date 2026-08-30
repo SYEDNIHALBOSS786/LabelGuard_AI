@@ -147,7 +147,10 @@ def run_tesseract(image_path):
     api_key = os.getenv("OCR_SPACE_API_KEY")
 
     if not api_key:
+        print("OCR API KEY: NOT SET")
         return ""
+
+    print("OCR API KEY: SET")
 
     try:
         with open(image_path, "rb") as f:
