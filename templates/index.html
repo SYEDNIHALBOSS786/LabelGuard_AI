@@ -1,160 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="google-site-verification" content="bH_wkxly4JKdivszMcz3ctgv9bT8yD5PrnIXTsjXsDc">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LabelGuard AI | Compliance Assistant</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabelGuard AI — Product Compliance Screener</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #0b0f19; --card-bg: #151c2e; --accent: #3b82f6; --text: #f3f4f6; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .hero-badge { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .card-custom { background: var(--card-bg); border: 1px solid #243049; border-radius: 14px; }
+        .upload-zone { border: 2px dashed #3b82f6; border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .upload-zone:hover { background: rgba(59, 130, 246, 0.05); }
+        .badge-pass { background: #065f46; color: #34d399; }
+        .badge-fail { background: #7f1d1d; color: #f87171; }
+        .score-pill { font-size: 2rem; font-weight: 700; }
+        pre { background: #070a12; color: #cbd5e1; border-radius: 8px; padding: 14px; font-size: 0.85rem; max-height: 250px; }
+    </style>
 </head>
 <body>
+    <div class="container py-4" style="max-width: 900px;">
+        <div class="text-center mb-4">
+            <span class="badge hero-badge px-3 py-2 rounded-pill mb-2">Automated Legal Metrology & FSSAI AI</span>
+            <h2 class="fw-bold">LabelGuard AI Screener</h2>
+            <p class="text-secondary">Instant AI-powered validation of mandatory consumer package declarations</p>
+        </div>
 
-<div class="container">
+        <div class="card card-custom p-4 shadow-lg mb-4">
+            <div class="upload-zone" onclick="document.getElementById('imageFile').click()">
+                <input type="file" id="imageFile" accept="image/*" class="d-none" onchange="previewImage(this)">
+                <div id="uploadPrompt">
+                    <h5 class="mb-1">📸 Upload or Capture Product Label</h5>
+                    <p class="text-secondary small mb-0">PNG, JPG, or WEBP packaging photos</p>
+                </div>
+                <img id="imagePreview" class="d-none img-fluid rounded mt-2" style="max-height: 220px;" />
+            </div>
+            
+            <button id="scanBtn" class="btn btn-primary w-100 mt-3 py-2 fw-semibold" onclick="processScan()">
+                🔍 Verify Compliance
+            </button>
+            <div id="loader" class="text-center mt-3 d-none text-info small">Processing image through Vision AI & Compliance Engine...</div>
+        </div>
 
-<header>
-<div class="badge">SIH26034 • COMPLIANCE ASSISTANT</div>
-<h1>LabelGuard <span>AI</span></h1>
-<p>AI-assisted screening of packaged commodity labels for required declarations.</p>
-</header>
+        <!-- Result Section -->
+        <div id="resultContainer" class="d-none">
+            <div class="card card-custom p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-secondary small text-uppercase">Screening Result</span>
+                        <h4 id="verdictText" class="fw-bold mb-0">--</h4>
+                    </div>
+                    <div class="text-end">
+                        <span class="score-pill" id="scoreDisplay">0/6</span>
+                        <div class="text-secondary small">Checks Passed</div>
+                    </div>
+                </div>
 
-<section class="card">
+                <h6 class="fw-bold mt-3 mb-2 text-info">Declaration Field Audit</h6>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr class="text-secondary small">
+                                <th>Mandatory Field</th>
+                                <th>Status</th>
+                                <th>Extracted Value</th>
+                                <th>Rule Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checksBody"></tbody>
+                    </table>
+                </div>
 
-<div class="section-heading">
-<h2>Inspect a Product</h2>
-<p>Upload a clear label image or enter label text manually.</p>
-</div>
+                <h6 class="fw-bold mt-4 mb-2 text-secondary">Transcribed Label Content</h6>
+                <pre id="rawTextOutput" class="mb-0"></pre>
+            </div>
+        </div>
+    </div>
 
-<div class="scan-section">
-<div class="scan-title">📷 Scan Product Label</div>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('d-none');
+                    document.getElementById('uploadPrompt').classList.add('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
-<div class="upload-options">
+        async function processScan() {
+            const fileInput = document.getElementById('imageFile');
+            if (!fileInput.files[0]) {
+                alert("Please select a label photo first!");
+                return;
+            }
 
-    <button type="button" class="upload-btn camera-btn"
-            onclick="openCamera()">
-        📷 Camera
-    </button>
+            const scanBtn = document.getElementById('scanBtn');
+            const loader = document.getElementById('loader');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            scanBtn.disabled = true;
+            loader.classList.remove('d-none');
+            resultContainer.classList.add('d-none');
 
-    <button type="button" class="upload-btn gallery-btn"
-            onclick="openGallery()">
-        🖼️ Gallery / File
-    </button>
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
 
-</div>
+            try {
+                const res = await fetch('/api/verify-compliance', { method: 'POST', body: formData });
+                const data = await res.json();
 
-<input type="file" id="cameraInput"
-       accept="image/*"
-       capture="environment"
-       hidden>
+                if (!data.success) {
+                    alert(data.message || "Error processing image.");
+                    return;
+                }
 
-<input type="file" id="galleryInput"
-       accept="image/*"
-       hidden>
+                // Render Summary
+                const isCompliant = data.overall_status === 'COMPLIANT';
+                document.getElementById('verdictText').innerHTML = isCompliant 
+                    ? `<span class="text-success">✅ COMPLIANT PRODUCT</span>`
+                    : `<span class="text-warning">⚠️ POTENTIAL NON-COMPLIANCE</span>`;
+                
+                document.getElementById('scoreDisplay').innerText = `${data.detected_count}/${data.total_checks}`;
+                document.getElementById('rawTextOutput').innerText = data.text || "No raw text detected.";
 
-<input type="file" id="imageInput"
-       accept="image/*"
-       hidden>
-
-<img id="preview" class="preview" alt="Product label preview">
-
-<button class="scan-btn" onclick="scanImage()">
-📷 Scan & Check Label
-</button>
-
-<div id="ocrStatus" class="status-text"></div>
-</div>
-
-<div class="divider"><span>OR ENTER TEXT</span></div>
-
-<label class="title" for="labelText">Detected / Label Text</label>
-
-<textarea id="labelText" placeholder="Example:
-
-MRP ₹99.00 (Incl. of all taxes)
-Net Quantity 500 g
-Manufactured by ABC Foods Pvt Ltd
-Packed by ABC Foods Pvt Ltd
-Date of Mfg: 08/2026
-Consumer Care: 1800-123-4567"></textarea>
-
-<div class="examples">
-<button onclick="loadExample(1)">Valid Example</button>
-<button onclick="loadExample(2)">Review Example</button>
-</div>
-
-<button class="analyze-btn" onclick="analyzeLabel()">
-🔍 Check Compliance
-</button>
-
-<div id="error" class="error"></div>
-
-</section>
-
-<section id="result" class="result hidden">
-
-<div class="result-header">
-<div>
-<span class="small-label">SCREENING RESULT</span>
-<h2 id="status">Result</h2>
-<p id="resultSummary">Compliance screening completed.</p>
-</div>
-
-<div class="score-circle">
-<span id="score">--</span>
-<small>/100</small>
-</div>
-</div>
-
-<div class="stats">
-<div class="stat">
-<strong id="detectedCount">0</strong>
-<span>Detected</span>
-</div>
-
-<div class="stat">
-<strong id="totalChecks">0</strong>
-<span>Total Checks</span>
-</div>
-
-<div class="stat">
-<strong id="missingCount">0</strong>
-<span>Not Detected</span>
-</div>
-</div>
-
-<div class="result-box">
-<h3>📋 Declaration Checks</h3>
-<div id="checks"></div>
-</div>
-
-<div class="result-box">
-<h3>⚠️ Items Requiring Attention</h3>
-<ul id="missing"></ul>
-</div>
-
-<div class="result-box extracted-box">
-<h3>📝 OCR / Input Evidence</h3>
-<pre id="extractedText">--</pre>
-</div>
-
-<div class="report-box">
-<div>
-<strong>Inspection screening</strong>
-<p id="analysisTime">--</p>
-</div>
-<button onclick="window.print()">🖨️ Print Report</button>
-</div>
-
-<div class="note">
-⚠️ <strong>Important:</strong> This tool provides AI-assisted screening only.
-A detected declaration does not by itself prove legal compliance.
-Final verification should be performed against applicable requirements
-and the original package.
-</div>
-
-</section>
-
-</div>
-
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+                // Render Table Rows
+                const tbody = document.getElementById('checksBody');
+                tbody.innerHTML = "";
+                if (data.checks && data.checks.length > 0) {
+                    data.checks.forEach(c => {
+                        const isPass = c.status === 'PASS';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="fw-semibold">${c.field}</td>
+                                <td><span class="badge ${isPass ? 'badge-pass' : 'badge-fail'} px-2 py-1">${c.status}</span></td>
+                                <td class="small ${isPass ? 'text-light' : 'text-danger'}">${c.found_value || 'Not Detected'}</td>
+                                <td class="small text-secondary">${c.feedback || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                resultContainer.classList.remove('d-none');
+            } catch (err) {
+                alert("Scan request failed: " + err.message);
+            } finally {
+                scanBtn.disabled = false;
+                loader.classList.add('d-none');
+            }
+        }
+    </script>
 </body>
 </html>
